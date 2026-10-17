@@ -2,10 +2,15 @@
 
 En yeni karar en üstte.
 
-**Açık karar:** Mobil uygulamanın teknolojisi (SwiftUI, React Native, Flutter vb.) ayrıca konuşulup netleştirilecek. İş analizindeki öneri SwiftUI.
+**Açık karar:** Mobil uygulamanın teknolojisi ayrıca konuşulup netleştirilecek. Uygulama hem iOS hem Android için yapılacağından seçim çapraz platform teknolojiler arasında.
 
 | Tarih | Karar | Neden |
 | --- | --- | --- |
+| 18 Ekim 2026 | Uygulama iOS ve Android için yapılacak | Kullanıcı tabanını iki platforma açmak |
+| 18 Ekim 2026 | Web sürümündeki veriler mobil uygulamaya aktarılmayacak | Uygulama sıfırdan başlar, taşıma işi gereksiz |
+| 18 Ekim 2026 | Israrcı hatırlatma aralığı varsayılan 5 dk, kullanıcı değiştirebilir | Unutkanlığa karşı sık uyarı, gerekirse seyreltilebilir |
+| 18 Ekim 2026 | Biten işler 3 ay saklanır, Takvim'de güne basınca görünür | Geçmişe bakabilmek, veriyi sınırlı tutmak |
+| 18 Ekim 2026 | Widget yalnızca Bugün listesini gösterir | Sade ve tek bakışta okunur |
 | 18 Ekim 2026 | Web sürümü geliştirmesi şimdilik durduruldu, analize devam | Öncelik mobil uygulamanın gereksinimlerini netleştirmek |
 | 18 Ekim 2026 | Israrcı hatırlatma her işte ayrı ayrı seçilecek, varsayılan kapalı | Her iş aynı aciliyette değil; rahatsız etme riskini düşürür |
 | 18 Ekim 2026 | Nihai hedef App Store'da yayınlamak | Kişisel kullanımın ötesine geçme isteği |

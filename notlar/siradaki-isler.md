@@ -2,7 +2,7 @@
 
 ## Mobil uygulama
 
-- [ ] Teknoloji seçimini netleştir (SwiftUI, React Native, Flutter...)
+- [ ] Teknoloji seçimini netleştir (iOS ve Android birlikte)
 - [ ] Seçilen teknolojiyle projeyi `ios/` klasöründe oluştur
 - [ ] Tarih, tekrar ve hatırlatma mantığını `public/tasks.js`'den yeni projeye taşı ve testlerini yaz
 - [ ] Bugün, Takvim, Tümü ekranları
@@ -13,6 +13,7 @@
 - [ ] Widget
 - [ ] Ücretsiz Apple hesabıyla kendi iPhone'una kurup bir hafta kullan
 - [ ] Apple Geliştirici Programı'na katıl, TestFlight, App Store başvurusu
+- [ ] Google Play geliştirici hesabı aç, kapalı test, Play Store başvurusu
 
 ## Web sürümü
 
