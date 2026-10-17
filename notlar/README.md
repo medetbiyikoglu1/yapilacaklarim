@@ -20,7 +20,7 @@ Canlı dokümanlar Claude'da düzenlenebilir ve yorumlanabilir; bu klasördeki d
 | --- | --- |
 | `notlar/` | Kararlar, analiz özetleri, mimari ve yapılacaklar |
 | `public/`, `src/`, `test/`, `scripts/` | Web sürümü (PWA) ve bildirim sunucusu |
-| `ios/` | Mobil uygulama için ayrılan klasör (React Native + Expo; geliştirme ayrı başlıkta yürüyor) |
+| `mobil/` | iOS ve Android uygulaması (React Native + Expo) |
 
 ## Notlar
 

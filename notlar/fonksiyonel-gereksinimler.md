@@ -14,7 +14,7 @@ Bugün (açılış), Takvim, Tümü alt sekmeleri; alttan açılan İş formu; A
 - Israrcı hatırlatma iş bazında, varsayılan kapalı; varsayılan aralık 5 dk (5/10/30/60 dk seçilebilir), en fazla 5 kez.
 - Tekrar: günlük, haftalık (seçili günler), aylık, yıllık. Ayda olmayan gün ayın son gününe kayar. Geciken tekrarlar birikmez.
 - "1 saat ertele" yalnızca bildirimi kaydırır; "Yarına at" işin tarihini yarına alır. Erteleme ısrar sayacını sıfırlar.
-- Yalnızca önümüzdeki 48 saatin bildirimleri (en fazla 64) telefona planlanır; açılışta, arka plan yenilemede ve iş değişikliğinde yeniden kurulur.
+- Önümüzdeki 14 günün bildirimleri, en yakın 60 tanesiyle sınırlı olarak telefona planlanır; açılışta, arka plan yenilemede ve iş değişikliğinde yeniden kurulur.
 
 - Biten işler 3 ay saklanır; Takvim'de geçmiş bir güne basınca o gün bitenler görünür.
 - Widget yalnızca Bugün listesini gösterir.

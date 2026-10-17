@@ -4,6 +4,8 @@ En yeni karar en üstte.
 
 | Tarih | Karar | Neden |
 | --- | --- | --- |
+| 18 Ekim 2026 | Bildirim planı 48 saat yerine 14 gün ileriyi kapsar, en yakın 60 bildirimle sınırlı | Uygulama birkaç gün açılmasa da hatırlatmalar kesilmesin; iOS'un 64 sınırının altında pay kalır |
+| 18 Ekim 2026 | Mobil uygulamanın kodu `mobil/` klasöründe; boş `ios/` klasörü kaldırıldı | Tek kod iOS ve Android'i birlikte kapsıyor |
 | 18 Ekim 2026 | Teknoloji: React Native + Expo (TypeScript); iOS derleme ve TestFlight EAS ile | Tek kodla iOS ve Android; web prototipindeki JavaScript bilgisi kullanılır |
 | 18 Ekim 2026 | Veri telefonda SQLite'ta (expo-sqlite) | 3 aylık geçmiş ve takvim sorguları için sağlam |
 | 18 Ekim 2026 | İlk sürümde senkron ve sunucu yok; bildirimleri telefon planlar. Senkron için ikinci sürümde aday Supabase | iCloud Android'de yok; senkron üyelik ve sunucu demek |
