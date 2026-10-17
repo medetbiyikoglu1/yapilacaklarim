@@ -24,7 +24,11 @@ function load() {
 }
 
 function save() {
-  localStorage.setItem(STORE_KEY, JSON.stringify(state.tasks));
+  try {
+    localStorage.setItem(STORE_KEY, JSON.stringify(state.tasks));
+  } catch {
+    // Storage full or blocked: keep working in memory.
+  }
 }
 
 const today = () => toKey(new Date());
@@ -140,7 +144,9 @@ function renderBanner() {
     show('bell', 'Hatırlatmaları kaçırma', 'İşlerin saati gelince sana bildirim gönderebilmem için izin ver.');
     const btn = document.createElement('button');
     btn.textContent = 'Bildirimleri aç';
-    btn.onclick = () => enableNotifications().catch(() => alert('Bildirim açılamadı, biraz sonra tekrar dene.'));
+    btn.onclick = () => enableNotifications().catch(() => {
+      btn.textContent = 'Açılamadı, tekrar dene';
+    });
     el.querySelector('div').append(document.createElement('br'), btn);
   }
 }
@@ -430,6 +436,8 @@ function openForm(task) {
   form.reset();
   $('#form-title').textContent = task ? 'İşi düzenle' : 'Yeni iş';
   $('#delete-btn').hidden = !task;
+  $('#delete-btn').classList.remove('armed');
+  $('#delete-btn').textContent = 'İşi sil';
   const values = {
     date: state.view === 'calendar' ? state.selected : today(),
     remindBefore: '0',
@@ -482,11 +490,16 @@ dialog.addEventListener('click', (e) => {
 });
 
 $('#cancel-btn').onclick = () => dialog.close();
-$('#delete-btn').onclick = () => {
-  if (state.editingId && confirm('Bu işi silmek istediğine emin misin?')) {
-    deleteTask(state.editingId);
-    dialog.close();
+// Two taps to delete: the first arms the button, the second deletes.
+$('#delete-btn').onclick = (e) => {
+  const btn = e.currentTarget;
+  if (!btn.classList.contains('armed')) {
+    btn.classList.add('armed');
+    btn.textContent = 'Silmek için tekrar dokun';
+    return;
   }
+  deleteTask(state.editingId);
+  dialog.close();
 };
 $('#add-btn').onclick = () => openForm(null);
 
