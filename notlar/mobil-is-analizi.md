@@ -20,7 +20,7 @@ Tam doküman: https://claude.ai/code/artifact/207f3d6d-5d27-4c52-9c62-068879a7dc
 
 ## Kritik teknik not
 
-iOS bir uygulama için en yakın 64 planlı bildirimi tutar. Israrcı ve tekrarlayan hatırlatmalar bu sınırı aşabileceği için yalnızca önümüzdeki 48 saatin bildirimleri planlanır ve uygulama açılışında, arka plan yenilemede ve iş değişikliğinde liste yenilenir.
+iOS bir uygulama için en yakın 64 planlı bildirimi tutar. Israrcı ve tekrarlayan hatırlatmalar bu sınırı aşabileceği için önümüzdeki 14 günün bildirimleri en yakın 60 tanesiyle sınırlı olarak planlanır ve uygulama açılışında, arka plan yenilemede ve iş değişikliğinde liste yenilenir.
 
 ## Başarı ölçütleri (ilk 4 hafta)
 
