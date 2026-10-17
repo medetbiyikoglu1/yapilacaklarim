@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#4f46e5">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Yapılacaklarım">
+  <title>Yapılacaklarım</title>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="apple-touch-icon" href="/icons/icon-180.png">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header class="top">
+    <h1 id="view-title">Bugün</h1>
+    <p id="today-label" class="muted"></p>
+  </header>
+
+  <div id="notify-banner" class="banner" hidden></div>
+
+  <main>
+    <section id="view-today" class="view"></section>
+
+    <section id="view-calendar" class="view" hidden>
+      <div class="cal-head">
+        <button class="icon-btn" id="cal-prev" aria-label="Önceki">‹</button>
+        <strong id="cal-title"></strong>
+        <button class="icon-btn" id="cal-next" aria-label="Sonraki">›</button>
+      </div>
+      <div class="segmented">
+        <button data-mode="month" class="active">Ay</button>
+        <button data-mode="week">Hafta</button>
+      </div>
+      <div class="cal-weekdays"><span>Pzt</span><span>Sal</span><span>Çar</span><span>Per</span><span>Cum</span><span>Cmt</span><span>Paz</span></div>
+      <div id="cal-grid" class="cal-grid"></div>
+      <h2 id="cal-day-title" class="section-title"></h2>
+      <div id="cal-day-list"></div>
+    </section>
+
+    <section id="view-all" class="view" hidden></section>
+  </main>
+
+  <button id="add-btn" class="fab" aria-label="İş ekle">+</button>
+
+  <nav class="tabs">
+    <button data-view="today" class="active"><span>☀️</span>Bugün</button>
+    <button data-view="calendar"><span>📅</span>Takvim</button>
+    <button data-view="all"><span>📋</span>Tümü</button>
+  </nav>
+
+  <dialog id="task-dialog">
+    <form id="task-form" method="dialog">
+      <h2 id="form-title">Yeni iş</h2>
+      <label>Ne yapacaksın?
+        <input name="title" required maxlength="120" placeholder="Örn. Faturayı öde" autocomplete="off">
+      </label>
+      <label>Not
+        <textarea name="note" rows="2" maxlength="500" placeholder="İsteğe bağlı"></textarea>
+      </label>
+      <div class="row">
+        <label>Tarih <input type="date" name="date" required></label>
+        <label>Saat <input type="time" name="time"></label>
+      </div>
+      <div class="row">
+        <label>Hatırlat
+          <select name="remindBefore">
+            <option value="0">Tam saatinde</option>
+            <option value="10">10 dk önce</option>
+            <option value="30">30 dk önce</option>
+            <option value="60">1 saat önce</option>
+            <option value="1440">1 gün önce</option>
+            <option value="-1">Hatırlatma yok</option>
+          </select>
+        </label>
+        <label>Tekrar
+          <select name="repeat">
+            <option value="none">Yok</option>
+            <option value="daily">Her gün</option>
+            <option value="weekly">Her hafta</option>
+            <option value="monthly">Her ay</option>
+          </select>
+        </label>
+      </div>
+      <label>Öncelik
+        <select name="priority">
+          <option value="normal">Normal</option>
+          <option value="high">Yüksek</option>
+          <option value="low">Düşük</option>
+        </select>
+      </label>
+      <p class="muted small">Saat girmezsen o gün sabah 09:00'da hatırlatırım.</p>
+      <div class="actions">
+        <button type="button" id="delete-btn" class="danger" hidden>Sil</button>
+        <span class="spacer"></span>
+        <button type="button" id="cancel-btn" class="ghost">Vazgeç</button>
+        <button type="submit" class="primary">Kaydet</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script type="module" src="/app.js"></script>
+</body>
+</html>
