@@ -1,4 +1,4 @@
-const CACHE = 'yapilacaklarim-v1';
+const CACHE = 'yapilacaklarim-v2';
 const ASSETS = ['/', '/index.html', '/styles.css', '/app.js', '/tasks.js', '/manifest.webmanifest', '/icons/icon-192.png'];
 
 self.addEventListener('install', (event) => {

@@ -3,7 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#4f46e5">
+  <meta name="theme-color" content="#f4f3ff" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0e0d16" media="(prefers-color-scheme: dark)">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Yapılacaklarım">
@@ -13,9 +14,32 @@
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
+    <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></symbol>
+    <symbol id="i-list" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+    <symbol id="i-repeat" viewBox="0 0 24 24"><path d="M17 2l4 4-4 4"/><path d="M3 11V9a3 3 0 0 1 3-3h15M7 22l-4-4 4-4"/><path d="M21 13v2a3 3 0 0 1-3 3H3"/></symbol>
+    <symbol id="i-bell-off" viewBox="0 0 24 24"><path d="M13.7 21a2 2 0 0 1-3.4 0M18.6 13A17 17 0 0 1 18 8M6.3 6.3A6 6 0 0 0 6 8c0 7-3 9-3 9h14M18 8a6 6 0 0 0-9.3-5M2 2l20 20"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a2 2 0 0 0 3.4 0"/></symbol>
+    <symbol id="i-snooze" viewBox="0 0 24 24"><path d="M5 12h12M13 6l6 6-6 6"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+    <symbol id="i-left" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></symbol>
+    <symbol id="i-right" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></symbol>
+    <symbol id="i-share" viewBox="0 0 24 24"><path d="M12 3v12M8 7l4-4 4 4M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></symbol>
+  </svg>
+
   <header class="top">
-    <h1 id="view-title">Bugün</h1>
-    <p id="today-label" class="muted"></p>
+    <div class="top-text">
+      <p id="greeting" class="eyebrow"></p>
+      <h1 id="view-title">Bugün</h1>
+      <p id="today-label" class="muted"></p>
+    </div>
+    <div id="progress" class="progress" hidden>
+      <svg viewBox="0 0 44 44"><circle class="track" cx="22" cy="22" r="18"/><circle class="bar" cx="22" cy="22" r="18"/></svg>
+      <span id="progress-text"></span>
+    </div>
   </header>
 
   <div id="notify-banner" class="banner" hidden></div>
@@ -24,17 +48,19 @@
     <section id="view-today" class="view"></section>
 
     <section id="view-calendar" class="view" hidden>
-      <div class="cal-head">
-        <button class="icon-btn" id="cal-prev" aria-label="Önceki">‹</button>
-        <strong id="cal-title"></strong>
-        <button class="icon-btn" id="cal-next" aria-label="Sonraki">›</button>
+      <div class="card cal-card">
+        <div class="cal-head">
+          <button class="round-btn" id="cal-prev" aria-label="Önceki"><svg><use href="#i-left"/></svg></button>
+          <strong id="cal-title"></strong>
+          <button class="round-btn" id="cal-next" aria-label="Sonraki"><svg><use href="#i-right"/></svg></button>
+        </div>
+        <div class="segmented">
+          <button type="button" data-mode="month" class="active">Ay</button>
+          <button type="button" data-mode="week">Hafta</button>
+        </div>
+        <div class="cal-weekdays"><span>Pzt</span><span>Sal</span><span>Çar</span><span>Per</span><span>Cum</span><span>Cmt</span><span>Paz</span></div>
+        <div id="cal-grid" class="cal-grid"></div>
       </div>
-      <div class="segmented">
-        <button data-mode="month" class="active">Ay</button>
-        <button data-mode="week">Hafta</button>
-      </div>
-      <div class="cal-weekdays"><span>Pzt</span><span>Sal</span><span>Çar</span><span>Per</span><span>Cum</span><span>Cmt</span><span>Paz</span></div>
-      <div id="cal-grid" class="cal-grid"></div>
       <h2 id="cal-day-title" class="section-title"></h2>
       <div id="cal-day-list"></div>
     </section>
@@ -42,61 +68,72 @@
     <section id="view-all" class="view" hidden></section>
   </main>
 
-  <button id="add-btn" class="fab" aria-label="İş ekle">+</button>
+  <button id="add-btn" class="fab" aria-label="İş ekle"><svg><use href="#i-plus"/></svg></button>
 
   <nav class="tabs">
-    <button data-view="today" class="active"><span>☀️</span>Bugün</button>
-    <button data-view="calendar"><span>📅</span>Takvim</button>
-    <button data-view="all"><span>📋</span>Tümü</button>
+    <button data-view="today" class="active"><svg><use href="#i-sun"/></svg>Bugün</button>
+    <button data-view="calendar"><svg><use href="#i-cal"/></svg>Takvim</button>
+    <button data-view="all"><svg><use href="#i-list"/></svg>Tümü</button>
   </nav>
 
-  <dialog id="task-dialog">
+  <dialog id="task-dialog" class="sheet">
     <form id="task-form" method="dialog">
-      <h2 id="form-title">Yeni iş</h2>
-      <label>Ne yapacaksın?
-        <input name="title" required maxlength="120" placeholder="Örn. Faturayı öde" autocomplete="off">
-      </label>
-      <label>Not
-        <textarea name="note" rows="2" maxlength="500" placeholder="İsteğe bağlı"></textarea>
-      </label>
-      <div class="row">
-        <label>Tarih <input type="date" name="date" required></label>
-        <label>Saat <input type="time" name="time"></label>
+      <div class="grabber"></div>
+      <div class="sheet-head">
+        <button type="button" id="cancel-btn" class="text-btn">Vazgeç</button>
+        <h2 id="form-title">Yeni iş</h2>
+        <button type="submit" class="text-btn strong">Kaydet</button>
       </div>
-      <div class="row">
-        <label>Hatırlat
-          <select name="remindBefore">
-            <option value="0">Tam saatinde</option>
-            <option value="10">10 dk önce</option>
-            <option value="30">30 dk önce</option>
-            <option value="60">1 saat önce</option>
-            <option value="1440">1 gün önce</option>
-            <option value="-1">Hatırlatma yok</option>
-          </select>
-        </label>
-        <label>Tekrar
-          <select name="repeat">
-            <option value="none">Yok</option>
-            <option value="daily">Her gün</option>
-            <option value="weekly">Her hafta</option>
-            <option value="monthly">Her ay</option>
-          </select>
-        </label>
+
+      <input name="title" class="title-input" required maxlength="120" placeholder="Ne yapacaksın?" autocomplete="off">
+      <textarea name="note" rows="2" maxlength="500" placeholder="Not ekle"></textarea>
+
+      <div class="field">
+        <span class="field-label">Ne zaman?</span>
+        <div class="chips" id="date-chips">
+          <button type="button" data-offset="0">Bugün</button>
+          <button type="button" data-offset="1">Yarın</button>
+          <button type="button" data-offset="weekend">Hafta sonu</button>
+          <button type="button" data-offset="7">Gelecek hafta</button>
+        </div>
+        <div class="row">
+          <input type="date" name="date" required aria-label="Tarih">
+          <input type="time" name="time" aria-label="Saat">
+        </div>
+        <span class="hint">Saat girmezsen o gün sabah 09:00'da hatırlatırım.</span>
       </div>
-      <label>Öncelik
-        <select name="priority">
-          <option value="normal">Normal</option>
-          <option value="high">Yüksek</option>
-          <option value="low">Düşük</option>
-        </select>
-      </label>
-      <p class="muted small">Saat girmezsen o gün sabah 09:00'da hatırlatırım.</p>
-      <div class="actions">
-        <button type="button" id="delete-btn" class="danger" hidden>Sil</button>
-        <span class="spacer"></span>
-        <button type="button" id="cancel-btn" class="ghost">Vazgeç</button>
-        <button type="submit" class="primary">Kaydet</button>
+
+      <div class="field">
+        <span class="field-label">Hatırlat</span>
+        <div class="chips">
+          <label><input type="radio" name="remindBefore" value="0" checked><span>Saatinde</span></label>
+          <label><input type="radio" name="remindBefore" value="10"><span>10 dk önce</span></label>
+          <label><input type="radio" name="remindBefore" value="60"><span>1 saat önce</span></label>
+          <label><input type="radio" name="remindBefore" value="1440"><span>1 gün önce</span></label>
+          <label><input type="radio" name="remindBefore" value="-1"><span>Kapalı</span></label>
+        </div>
       </div>
+
+      <div class="field">
+        <span class="field-label">Tekrar</span>
+        <div class="chips">
+          <label><input type="radio" name="repeat" value="none" checked><span>Yok</span></label>
+          <label><input type="radio" name="repeat" value="daily"><span>Her gün</span></label>
+          <label><input type="radio" name="repeat" value="weekly"><span>Her hafta</span></label>
+          <label><input type="radio" name="repeat" value="monthly"><span>Her ay</span></label>
+        </div>
+      </div>
+
+      <div class="field">
+        <span class="field-label">Öncelik</span>
+        <div class="chips prio">
+          <label><input type="radio" name="priority" value="low"><span><i class="dot low"></i>Düşük</span></label>
+          <label><input type="radio" name="priority" value="normal" checked><span><i class="dot normal"></i>Normal</span></label>
+          <label><input type="radio" name="priority" value="high"><span><i class="dot high"></i>Yüksek</span></label>
+        </div>
+      </div>
+
+      <button type="button" id="delete-btn" class="delete-btn" hidden>İşi sil</button>
     </form>
   </dialog>
 

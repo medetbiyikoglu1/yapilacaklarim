@@ -116,43 +116,60 @@ function isStandalone() {
   return window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
 }
 
+function icon(name) {
+  return `<svg><use href="#i-${name}"/></svg>`;
+}
+
 function renderBanner() {
   const el = $('#notify-banner');
   const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
-  el.hidden = false;
+  const show = (iconName, title, text, plain = false) => {
+    el.hidden = false;
+    el.className = `banner${plain ? ' plain' : ''}`;
+    el.innerHTML = `<span class="banner-icon">${icon(iconName)}</span><div><strong>${title}</strong>${text}</div>`;
+  };
   if (isIOS && !isStandalone()) {
-    el.innerHTML =
-      '<strong>Bildirim almak için ana ekrana ekle.</strong><br>Safari\'de alttaki Paylaş (□↑) düğmesine bas, "Ana Ekrana Ekle"yi seç, sonra uygulamayı ana ekrandan aç.';
+    show('share', 'Önce ana ekrana ekle', 'Safari\'de Paylaş düğmesine bas, "Ana Ekrana Ekle"yi seç ve uygulamayı ana ekrandan aç. Bildirimler ancak böyle gelir.');
   } else if (!('Notification' in window) || !('PushManager' in window)) {
-    el.textContent = 'Bu tarayıcı bildirimleri desteklemiyor. iPhone\'da iOS 16.4 veya üstü gerekiyor.';
+    show('bell-off', 'Bildirim desteklenmiyor', 'iPhone\'da iOS 16.4 veya üstü gerekiyor.', true);
   } else if (Notification.permission === 'denied') {
-    el.textContent = 'Bildirimler kapalı. Ayarlar > Bildirimler > Yapılacaklarım\'dan açabilirsin.';
+    show('bell-off', 'Bildirimler kapalı', 'Ayarlar > Bildirimler > Yapılacaklarım\'dan açabilirsin.', true);
   } else if (Notification.permission === 'granted' && subId()) {
     el.hidden = true;
   } else {
-    el.innerHTML = '<strong>Hatırlatmaları kaçırma.</strong><br>İşlerin saati gelince sana bildirim gönderebilmem için izin ver.';
+    show('bell', 'Hatırlatmaları kaçırma', 'İşlerin saati gelince sana bildirim gönderebilmem için izin ver.');
     const btn = document.createElement('button');
-    btn.className = 'primary';
     btn.textContent = 'Bildirimleri aç';
     btn.onclick = () => enableNotifications().catch(() => alert('Bildirim açılamadı, biraz sonra tekrar dene.'));
-    el.append(document.createElement('br'), btn);
+    el.querySelector('div').append(document.createElement('br'), btn);
   }
 }
 
 // ---------- Rendering ----------
 
+function pill(iconName, text, cls = '') {
+  const el = document.createElement('span');
+  el.className = `pill ${cls}`;
+  el.innerHTML = iconName ? icon(iconName) : '';
+  el.append(text);
+  return el;
+}
+
 function taskEl(task, dayKey) {
+  const day = dayKey || task.date;
   const el = document.createElement('div');
-  const doneToday = task.done;
-  el.className = `task ${task.priority || 'normal'}${doneToday ? ' done' : ''}`;
+  el.className = `task ${task.priority || 'normal'}${task.done ? ' done' : ''}`;
 
   const check = document.createElement('button');
   check.className = 'check';
-  check.setAttribute('aria-label', 'Tamamlandı');
-  check.textContent = doneToday ? '✓' : '';
+  check.setAttribute('aria-label', task.done ? 'Geri al' : 'Tamamlandı');
+  check.innerHTML = icon('check');
   check.onclick = (e) => {
     e.stopPropagation();
-    toggleDone(task.id);
+    if (task.done) return toggleDone(task.id);
+    el.classList.add('done');
+    setTimeout(() => el.classList.add('leaving'), 250);
+    setTimeout(() => toggleDone(task.id), 500);
   };
 
   const body = document.createElement('div');
@@ -160,32 +177,36 @@ function taskEl(task, dayKey) {
   const title = document.createElement('div');
   title.className = 'task-title';
   title.textContent = task.title;
-  const meta = document.createElement('div');
-  meta.className = 'task-meta';
-  const parts = [];
-  const day = dayKey || task.date;
-  if (state.view !== 'calendar' && day !== today()) parts.push(formatDay(day));
-  if (task.time) parts.push(task.time);
-  if (task.repeat && task.repeat !== 'none') parts.push(`🔁 ${REPEAT_LABEL[task.repeat]}`);
-  if (Number(task.remindBefore) < 0) parts.push('🔕');
-  meta.textContent = parts.join(' · ');
   body.append(title);
-  if (parts.length) body.append(meta);
+
   if (task.note) {
     const note = document.createElement('div');
     note.className = 'task-note';
     note.textContent = task.note;
     body.append(note);
   }
+
+  const meta = document.createElement('div');
+  meta.className = 'meta';
+  const late = !task.done && day < today();
+  if (state.view !== 'calendar' && day !== today()) meta.append(pill(late ? 'clock' : null, formatDay(day), late ? 'late' : ''));
+  if (task.time) meta.append(pill('clock', task.time));
+  if (task.repeat && task.repeat !== 'none') meta.append(pill('repeat', REPEAT_LABEL[task.repeat]));
+  if (task.priority === 'high') meta.append(pill(null, 'Önemli', 'prio-high'));
+  if (Number(task.remindBefore) < 0) meta.append(pill('bell-off', 'Sessiz'));
+  if (meta.childNodes.length) body.append(meta);
+
   el.append(check, body);
 
-  if (!task.done && (dayKey || task.date) <= today()) {
+  if (!task.done && day <= today()) {
     const snooze = document.createElement('button');
     snooze.className = 'snooze';
-    snooze.textContent = 'Yarına at';
+    snooze.innerHTML = `Yarın${icon('snooze')}`;
+    snooze.setAttribute('aria-label', 'Yarına at');
     snooze.onclick = (e) => {
       e.stopPropagation();
-      updateTask(task.id, { date: addDays(today(), 1) });
+      el.classList.add('leaving');
+      setTimeout(() => updateTask(task.id, { date: addDays(today(), 1) }), 250);
     };
     el.append(snooze);
   }
@@ -194,14 +215,31 @@ function taskEl(task, dayKey) {
   return el;
 }
 
-function section(title, tasks, dayKey, cls = '') {
-  const frag = document.createDocumentFragment();
-  if (!tasks.length) return frag;
+function sectionTitle(title, count, cls = '') {
   const h = document.createElement('h2');
   h.className = `section-title ${cls}`;
   h.textContent = title;
-  frag.append(h, ...tasks.map((t) => taskEl(t, dayKey)));
+  if (count) {
+    const c = document.createElement('span');
+    c.className = 'count';
+    c.textContent = count;
+    h.append(c);
+  }
+  return h;
+}
+
+function section(title, tasks, dayKey, cls = '') {
+  const frag = document.createDocumentFragment();
+  if (!tasks.length) return frag;
+  frag.append(sectionTitle(title, tasks.length, cls), ...tasks.map((t) => taskEl(t, dayKey)));
   return frag;
+}
+
+function emptyState(emoji, title, text) {
+  const p = document.createElement('div');
+  p.className = 'empty';
+  p.innerHTML = `<span class="emoji">${emoji}</span><strong>${title}</strong>${text}`;
+  return p;
 }
 
 const byTime = (a, b) => (a.time || DEFAULT_TIME).localeCompare(b.time || DEFAULT_TIME);
@@ -229,18 +267,29 @@ function renderToday() {
   root.append(section('Gecikenler', overdue, null, 'overdue'));
   root.append(section('Bugün', todays, t));
   if (!overdue.length && !todays.length) {
-    const p = document.createElement('p');
-    p.className = 'empty';
-    p.textContent = 'Bugün için iş yok. Eklemek için + düğmesine bas.';
-    root.append(p);
+    root.append(
+      doneToday.length
+        ? emptyState('🎉', 'Bugünlük hepsi bitti', 'Harika iş çıkardın.')
+        : emptyState('☀️', 'Bugün boş', 'Aklına bir şey gelirse + ile hemen ekle.')
+    );
   }
   if (upcoming.length) {
-    const h = document.createElement('h2');
-    h.className = 'section-title';
-    h.textContent = 'Önümüzdeki 7 gün';
-    root.append(h, ...upcoming.map(([x, k]) => taskEl(x, k)));
+    root.append(sectionTitle('Önümüzdeki 7 gün', upcoming.length), ...upcoming.map(([x, k]) => taskEl(x, k)));
   }
   root.append(section('Bugün bitenler', doneToday, t));
+}
+
+function renderProgress() {
+  const el = $('#progress');
+  const t = today();
+  const due = state.tasks.filter((x) => !x.done && x.date <= t && (x.date < t || occursOn(x, t))).length;
+  const done = state.tasks.filter((x) => (x.done && x.date === t) || (x.lastDoneAt && toKey(new Date(x.lastDoneAt)) === t)).length;
+  const total = due + done;
+  el.hidden = state.view !== 'today' || total === 0;
+  if (el.hidden) return;
+  const ratio = done / total;
+  el.querySelector('.bar').style.strokeDashoffset = String(113.1 * (1 - ratio));
+  $('#progress-text').textContent = `${done}/${total}`;
 }
 
 function calendarDays() {
@@ -262,6 +311,8 @@ function calendarDays() {
   });
 }
 
+const tasksOn = (key) => state.tasks.filter((x) => (x.done ? x.date === key : occursOn(x, key)));
+
 function renderCalendar() {
   const sel = fromKey(state.selected);
   $('#cal-title').textContent = `${MONTHS[sel.getMonth()]} ${sel.getFullYear()}`;
@@ -275,12 +326,16 @@ function renderCalendar() {
     if (state.calMode === 'month' && d.getMonth() !== sel.getMonth()) btn.classList.add('other');
     if (key === t) btn.classList.add('today');
     if (key === state.selected) btn.classList.add('selected');
-    btn.textContent = d.getDate();
-    const count = state.tasks.filter((x) => (x.done ? x.date === key : occursOn(x, key))).length;
-    if (count) {
+    btn.innerHTML = `<span class="num">${d.getDate()}</span>`;
+    const items = tasksOn(key).filter((x) => !x.done);
+    if (items.length) {
       const dots = document.createElement('span');
       dots.className = 'dots';
-      for (let i = 0; i < Math.min(count, 3); i++) dots.append(document.createElement('i'));
+      for (const x of items.slice(0, 3)) {
+        const i = document.createElement('i');
+        i.className = x.priority || 'normal';
+        dots.append(i);
+      }
       btn.append(dots);
     }
     btn.onclick = () => {
@@ -290,19 +345,12 @@ function renderCalendar() {
     grid.append(btn);
   }
 
-  $('#cal-day-title').textContent = formatDay(state.selected);
+  $('#cal-day-title').replaceChildren(...sectionTitle(formatDay(state.selected), tasksOn(state.selected).length).childNodes);
   const list = $('#cal-day-list');
   list.replaceChildren();
-  const items = state.tasks
-    .filter((x) => (x.done ? x.date === state.selected : occursOn(x, state.selected)))
-    .sort(byTime);
+  const items = tasksOn(state.selected).sort(byTime);
   if (items.length) list.append(...items.map((x) => taskEl(x, state.selected)));
-  else {
-    const p = document.createElement('p');
-    p.className = 'empty';
-    p.textContent = 'Bu güne iş planlamak için + düğmesine bas.';
-    list.append(p);
-  }
+  else list.append(emptyState('🗓️', 'Bu gün boş', 'Bu güne iş planlamak için + düğmesine bas.'));
 }
 
 function renderAll() {
@@ -312,23 +360,29 @@ function renderAll() {
   const done = state.tasks.filter((x) => x.done).sort((a, b) => (b.doneAt || 0) - (a.doneAt || 0)).slice(0, 30);
   root.append(section('Yapılacaklar', open, null));
   root.append(section('Tamamlananlar', done, null));
-  if (!open.length && !done.length) {
-    const p = document.createElement('p');
-    p.className = 'empty';
-    p.textContent = 'Henüz hiç iş eklemedin.';
-    root.append(p);
-  }
+  if (!open.length && !done.length) root.append(emptyState('📝', 'Liste boş', 'İlk işini eklemek için + düğmesine bas.'));
 }
 
 const TITLES = { today: 'Bugün', calendar: 'Takvim', all: 'Tüm işler' };
 
+function greeting() {
+  const h = new Date().getHours();
+  if (h < 5) return 'İyi geceler';
+  if (h < 12) return 'Günaydın';
+  if (h < 18) return 'İyi günler';
+  return 'İyi akşamlar';
+}
+
 function render() {
+  document.body.dataset.view = state.view;
   $('#view-title').textContent = TITLES[state.view];
+  $('#greeting').textContent = state.view === 'today' ? greeting() : '';
   $('#today-label').textContent = new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', weekday: 'long' });
   for (const v of ['today', 'calendar', 'all']) $(`#view-${v}`).hidden = v !== state.view;
   if (state.view === 'today') renderToday();
   if (state.view === 'calendar') renderCalendar();
   if (state.view === 'all') renderAll();
+  renderProgress();
 }
 
 // ---------- Mutations ----------
@@ -358,20 +412,41 @@ function deleteTask(id) {
 const dialog = $('#task-dialog');
 const form = $('#task-form');
 
+function dateForChip(offset) {
+  if (offset !== 'weekend') return addDays(today(), Number(offset));
+  const d = new Date();
+  const toSat = (6 - d.getDay() + 7) % 7;
+  return addDays(today(), toSat);
+}
+
+function highlightDateChip() {
+  for (const b of document.querySelectorAll('#date-chips button')) {
+    b.classList.toggle('active', dateForChip(b.dataset.offset) === form.elements.date.value);
+  }
+}
+
 function openForm(task) {
   state.editingId = task?.id || null;
   form.reset();
   $('#form-title').textContent = task ? 'İşi düzenle' : 'Yeni iş';
   $('#delete-btn').hidden = !task;
-  const values = task || {
+  const values = {
     date: state.view === 'calendar' ? state.selected : today(),
     remindBefore: '0',
     repeat: 'none',
     priority: 'normal',
+    ...task,
   };
   for (const [k, v] of Object.entries(values)) {
-    if (form.elements[k]) form.elements[k].value = v ?? '';
+    const field = form.elements[k];
+    if (!field) continue;
+    if (field instanceof RadioNodeList) {
+      // Older tasks may hold a reminder offset that has no chip; fall back to "on time".
+      const match = [...field].find((r) => r.value === String(v));
+      (match || field[0]).checked = true;
+    } else field.value = v ?? '';
   }
+  highlightDateChip();
   dialog.showModal();
   if (!task) form.elements.title.focus();
 }
@@ -393,6 +468,19 @@ form.addEventListener('submit', (e) => {
   dialog.close();
 });
 
+for (const b of document.querySelectorAll('#date-chips button')) {
+  b.onclick = () => {
+    form.elements.date.value = dateForChip(b.dataset.offset);
+    highlightDateChip();
+  };
+}
+form.elements.date.addEventListener('input', highlightDateChip);
+
+// Tapping the dimmed area closes the sheet.
+dialog.addEventListener('click', (e) => {
+  if (e.target === dialog) dialog.close();
+});
+
 $('#cancel-btn').onclick = () => dialog.close();
 $('#delete-btn').onclick = () => {
   if (state.editingId && confirm('Bu işi silmek istediğine emin misin?')) {
@@ -407,6 +495,7 @@ document.querySelectorAll('.tabs button').forEach((btn) => {
     state.view = btn.dataset.view;
     document.querySelectorAll('.tabs button').forEach((b) => b.classList.toggle('active', b === btn));
     render();
+    window.scrollTo({ top: 0 });
   };
 });
 
