@@ -6,6 +6,7 @@ En yeni karar en üstte.
 
 | Tarih | Karar | Neden |
 | --- | --- | --- |
+| 18 Ekim 2026 | Web sürümü geliştirmesi şimdilik durduruldu, analize devam | Öncelik mobil uygulamanın gereksinimlerini netleştirmek |
 | 18 Ekim 2026 | Israrcı hatırlatma her işte ayrı ayrı seçilecek, varsayılan kapalı | Her iş aynı aciliyette değil; rahatsız etme riskini düşürür |
 | 18 Ekim 2026 | Nihai hedef App Store'da yayınlamak | Kişisel kullanımın ötesine geçme isteği |
 | 18 Ekim 2026 | Apple Geliştirici Programı (yıllık 99 $) geliştirme bitince alınacak | O zamana kadar ücretsiz Apple hesabıyla Xcode'dan telefona kurulur (7 günde bir yeniden kurulum) |

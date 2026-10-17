@@ -10,6 +10,7 @@ Unutkanlığa karşı, işleri takvime planlayıp saatinde (ve gerekirse ısrarl
 | Web sürümü deneme sayfası (bildirimsiz, örnek işlerle) | https://claude.ai/artifact/LQYKHfR3JJUZPcU9zcm1UU |
 | Rakip analizi (canlı doküman) | https://claude.ai/code/artifact/d2a21e21-0845-49a4-b7b7-0737ff121c83 |
 | Mobil uygulama iş analizi (canlı doküman) | https://claude.ai/code/artifact/207f3d6d-5d27-4c52-9c62-068879a7dc93 |
+| Fonksiyonel gereksinimler (canlı doküman) | https://claude.ai/code/artifact/9df79e41-77bf-4aaf-b233-02a886b62ad7 |
 
 Canlı dokümanlar Claude'da düzenlenebilir ve yorumlanabilir; bu klasördeki dosyalar onların özetidir.
 
@@ -28,4 +29,5 @@ Canlı dokümanlar Claude'da düzenlenebilir ve yorumlanabilir; bu klasördeki d
 - [Web sürümü mimarisi](mimari-web.md)
 - [Rakip analizi özeti](rakip-analizi.md)
 - [Mobil uygulama iş analizi özeti](mobil-is-analizi.md)
+- [Fonksiyonel gereksinimler özeti](fonksiyonel-gereksinimler.md)
 - [Sıradaki işler](siradaki-isler.md)
