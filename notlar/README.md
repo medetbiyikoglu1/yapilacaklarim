@@ -20,7 +20,7 @@ Canlı dokümanlar Claude'da düzenlenebilir ve yorumlanabilir; bu klasördeki d
 | --- | --- |
 | `notlar/` | Kararlar, analiz özetleri, mimari ve yapılacaklar |
 | `public/`, `src/`, `test/`, `scripts/` | Web sürümü (PWA) ve bildirim sunucusu |
-| `ios/` | iPhone uygulaması, sıradaki geliştirme (teknoloji seçimi açık) |
+| `ios/` | Mobil uygulama için ayrılan klasör (React Native + Expo; geliştirme ayrı başlıkta yürüyor) |
 
 ## Notlar
 
@@ -29,5 +29,6 @@ Canlı dokümanlar Claude'da düzenlenebilir ve yorumlanabilir; bu klasördeki d
 - [Web sürümü mimarisi](mimari-web.md)
 - [Rakip analizi özeti](rakip-analizi.md)
 - [Mobil uygulama iş analizi özeti](mobil-is-analizi.md)
+- [Mobil uygulama mimarisi](mimari-mobil.md)
 - [Fonksiyonel gereksinimler özeti](fonksiyonel-gereksinimler.md)
 - [Sıradaki işler](siradaki-isler.md)

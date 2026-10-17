@@ -2,7 +2,7 @@
 
 Tam doküman (diyagramlarla): https://claude.ai/code/artifact/9df79e41-77bf-4aaf-b233-02a886b62ad7
 
-Uygulama iOS ve Android için yapılacak. Doküman teknolojiden bağımsız yazıldı; teknoloji seçimi ayrıca netleşiyor.
+Uygulama iOS ve Android için yapılacak. Teknoloji React Native + Expo, veri telefonda SQLite'ta; ayrıntı [mobil mimari](mimari-mobil.md) notunda.
 
 ## Ekranlar
 
@@ -29,7 +29,7 @@ Göreli gün, haftanın günü, göreli süre, takvim tarihi, saat, gün dilimi 
 
 ## Kararlaşan sorular
 
-1. Platform: iOS ve Android birlikte; teknoloji önerisi ayrı başlıkta hazırlanıyor (tek açık konu).
+1. Platform ve teknoloji: iOS ve Android birlikte, React Native + Expo ile.
 2. Web sürümündeki işler aktarılmayacak.
 3. Israrcı hatırlatma aralığı varsayılan 5 dk, kullanıcı değiştirebilir.
 4. Biten işler 3 ay saklanır, Takvim'de gösterilir.

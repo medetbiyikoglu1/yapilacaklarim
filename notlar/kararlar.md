@@ -2,10 +2,11 @@
 
 En yeni karar en üstte.
 
-**Açık karar:** Mobil uygulamanın teknolojisi ayrıca konuşulup netleştirilecek. Uygulama hem iOS hem Android için yapılacağından seçim çapraz platform teknolojiler arasında.
-
 | Tarih | Karar | Neden |
 | --- | --- | --- |
+| 18 Ekim 2026 | Teknoloji: React Native + Expo (TypeScript); iOS derleme ve TestFlight EAS ile | Tek kodla iOS ve Android; web prototipindeki JavaScript bilgisi kullanılır |
+| 18 Ekim 2026 | Veri telefonda SQLite'ta (expo-sqlite) | 3 aylık geçmiş ve takvim sorguları için sağlam |
+| 18 Ekim 2026 | İlk sürümde senkron ve sunucu yok; bildirimleri telefon planlar. Senkron için ikinci sürümde aday Supabase | iCloud Android'de yok; senkron üyelik ve sunucu demek |
 | 18 Ekim 2026 | Uygulama iOS ve Android için yapılacak | Kullanıcı tabanını iki platforma açmak |
 | 18 Ekim 2026 | Web sürümündeki veriler mobil uygulamaya aktarılmayacak | Uygulama sıfırdan başlar, taşıma işi gereksiz |
 | 18 Ekim 2026 | Israrcı hatırlatma aralığı varsayılan 5 dk, kullanıcı değiştirebilir | Unutkanlığa karşı sık uyarı, gerekirse seyreltilebilir |

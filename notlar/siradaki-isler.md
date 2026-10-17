@@ -2,8 +2,8 @@
 
 ## Mobil uygulama
 
-- [ ] Teknoloji seçimini netleştir (iOS ve Android birlikte)
-- [ ] Seçilen teknolojiyle projeyi `ios/` klasöründe oluştur
+- [x] Teknoloji seçimi: React Native + Expo (iOS ve Android)
+- [ ] Expo projesini oluştur
 - [ ] Tarih, tekrar ve hatırlatma mantığını `public/tasks.js`'den yeni projeye taşı ve testlerini yaz
 - [ ] Bugün, Takvim, Tümü ekranları
 - [ ] Yerel bildirim planlama (48 saatlik pencere) ve bildirim düğmeleri

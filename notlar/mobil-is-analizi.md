@@ -2,7 +2,7 @@
 
 Tam doküman: https://claude.ai/code/artifact/207f3d6d-5d27-4c52-9c62-068879a7dc93
 
-**Konum:** Unutkan bir kullanıcıya işi yapılana kadar hatırlatan, ücretsiz ve sade bir telefon uygulaması (iOS ve Android). Teknoloji seçimi ayrıca netleştirilecek.
+**Konum:** Unutkan bir kullanıcıya işi yapılana kadar hatırlatan, ücretsiz ve sade bir telefon uygulaması (iOS ve Android). Teknoloji: React Native + Expo, veri telefonda SQLite'ta.
 
 ## MVP kapsamı
 
