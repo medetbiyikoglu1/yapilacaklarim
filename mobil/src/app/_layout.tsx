@@ -11,9 +11,9 @@ export default function RootLayout() {
   const t = useTheme();
   const nav = scheme === 'dark' ? DarkTheme : DefaultTheme;
   return (
-    <ThemeProvider value={{ ...nav, colors: { ...nav.colors, background: t.bg, card: t.card, primary: t.accent, text: t.text, border: t.line } }}>
+    <ThemeProvider value={{ ...nav, colors: { ...nav.colors, background: t.bg, card: t.card, primary: t.tint, text: t.text, border: t.line } }}>
       <StoreProvider>
-        <Stack screenOptions={{ headerShadowVisible: false, headerStyle: { backgroundColor: t.bg }, headerTintColor: t.accent, headerTitleStyle: { color: t.text } }}>
+        <Stack screenOptions={{ headerShadowVisible: false, headerStyle: { backgroundColor: t.bg }, headerTintColor: t.tint, headerTitleStyle: { color: t.text } }}>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="is" options={{ presentation: 'modal', headerShown: false }} />
           <Stack.Screen name="ayarlar" options={{ title: 'Ayarlar', headerBackTitle: 'Geri' }} />

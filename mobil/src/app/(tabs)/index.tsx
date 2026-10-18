@@ -60,7 +60,7 @@ export default function TodayScreen() {
         </View>
 
         <Card inner={styles.quick}>
-          <Icon name="plus" size={20} color={t.accent} />
+          <Icon name="plus" size={20} color={t.tint} />
           <TextInput
             value={quick}
             onChangeText={setQuick}

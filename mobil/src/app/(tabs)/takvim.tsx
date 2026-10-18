@@ -34,7 +34,7 @@ export default function CalendarScreen() {
 
   const dots = (key: string): string[] => {
     const open = tasks.filter((x) => occursOn(x, key));
-    const colors = open.sort((a, b) => b.priority - a.priority).map((x) => (x.priority >= 2 ? t.priority[x.priority] : t.accent));
+    const colors = open.sort((a, b) => b.priority - a.priority).map((x) => (x.priority >= 2 ? t.priority[x.priority] : t.tint));
     if (doneByDay.has(key)) colors.push(t.success);
     return colors;
   };

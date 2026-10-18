@@ -53,7 +53,7 @@ export function MonthGrid({ year, month, selected, today, onSelect, onMonth, dot
           return (
             <Pressable key={key} onPress={() => onSelect(key)} style={styles.cell} accessibilityLabel={key}>
               <View style={[styles.day, isSel && { backgroundColor: t.accent }, !isSel && isToday && { backgroundColor: t.accentSoft }]}>
-                <Text style={[styles.dayText, { color: isSel ? t.onAccent : isToday ? t.accent : key < today ? t.muted : t.text }, (isSel || isToday) && styles.bold]}>
+                <Text style={[styles.dayText, { color: isSel ? t.onAccent : isToday ? t.tint : key < today ? t.muted : t.text }, (isSel || isToday) && styles.bold]}>
                   {Number(key.slice(8))}
                 </Text>
               </View>

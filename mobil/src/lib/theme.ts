@@ -1,38 +1,41 @@
 import { useColorScheme } from 'react-native';
 
-// Same palette as the web prototype (public/styles.css).
+// Yellow and black. `accent` fills (chips, buttons, selected day) with `onAccent` text on
+// top; `tint` is for highlighted text and icons, because yellow text is unreadable on white.
 const light = {
-  bg: '#F4F3FF',
+  bg: '#F6F5F1',
   card: '#FFFFFF',
-  card2: '#F6F5FD',
-  text: '#16142B',
-  muted: '#77748F',
-  line: '#E9E7F5',
-  accent: '#5B4CF0',
-  accentSoft: '#ECEBFF',
-  onAccent: '#FFFFFF',
-  danger: '#E5484D',
-  dangerSoft: '#FDECEC',
-  success: '#2F9E63',
-  priority: ['transparent', '#9CA3AF', '#5B4CF0', '#F76B15'],
-  shadow: 'rgba(22, 20, 43, 0.08)',
+  card2: '#F1EFE8',
+  text: '#121212',
+  muted: '#6E6A60',
+  line: '#E6E3DA',
+  accent: '#FFD400',
+  accentSoft: '#FFF3B8',
+  onAccent: '#121212',
+  tint: '#121212',
+  danger: '#D93636',
+  dangerSoft: '#FCE9E9',
+  success: '#1F9D55',
+  priority: ['transparent', '#A8A29E', '#F5B700', '#E5484D'],
+  shadow: 'rgba(18, 18, 18, 0.08)',
 };
 
 const dark: typeof light = {
-  bg: '#0E0D16',
-  card: '#1A1928',
-  card2: '#232235',
-  text: '#F2F1FA',
-  muted: '#9A97B3',
-  line: '#2B2A40',
-  accent: '#8F84FF',
-  accentSoft: '#29264D',
-  onAccent: '#FFFFFF',
-  danger: '#FF6B6F',
-  dangerSoft: '#3A1C22',
+  bg: '#0B0B0B',
+  card: '#171717',
+  card2: '#232323',
+  text: '#F5F4EF',
+  muted: '#9A968C',
+  line: '#2A2A2A',
+  accent: '#FFD400',
+  accentSoft: '#3A3100',
+  onAccent: '#121212',
+  tint: '#FFD400',
+  danger: '#FF6B6B',
+  dangerSoft: '#3A1C1C',
   success: '#4CC38A',
-  priority: ['transparent', '#6B7280', '#8F84FF', '#FF8A3D'],
-  shadow: 'rgba(0, 0, 0, 0.3)',
+  priority: ['transparent', '#6B6B6B', '#FFD400', '#FF6B6B'],
+  shadow: 'rgba(0, 0, 0, 0.4)',
 };
 
 export type Theme = typeof light;

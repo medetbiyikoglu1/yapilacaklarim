@@ -74,8 +74,8 @@ export function DoneRow({ title, sub, onUndo }: { title: string; sub?: string; o
       style={({ pressed }) => [styles.row, { borderBottomColor: t.line, opacity: pressed ? 0.6 : 1 }]}
     >
       <View style={styles.bar} />
-      <View style={[styles.check, styles.checkDone, { backgroundColor: t.success, borderColor: t.success }]}>
-        <Icon name="check" size={14} color="#fff" strokeWidth={2.6} />
+      <View style={[styles.check, styles.checkDone, { backgroundColor: t.tint, borderColor: t.tint }]}>
+        <Icon name="check" size={14} color={t.card} strokeWidth={2.6} />
       </View>
       <View style={styles.body}>
         <Text style={[styles.title, styles.doneTitle, { color: t.muted }]} numberOfLines={2}>

@@ -99,7 +99,7 @@ export default function TaskForm() {
         </Pressable>
         <Text style={[styles.barTitle, { color: t.text }]}>{existing ? 'İşi düzenle' : 'Yeni iş'}</Text>
         <Pressable onPress={submit} hitSlop={10} disabled={!task.title.trim()}>
-          <Text style={[styles.barBtn, styles.bold, { color: task.title.trim() ? t.accent : t.muted }]}>Kaydet</Text>
+          <Text style={[styles.barBtn, styles.bold, { color: task.title.trim() ? t.tint : t.muted }]}>Kaydet</Text>
         </Pressable>
       </View>
 
