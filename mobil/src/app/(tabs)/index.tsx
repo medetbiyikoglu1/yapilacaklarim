@@ -8,6 +8,7 @@ import { Fab } from '../../components/Fab';
 import { Icon } from '../../components/Icon';
 import { DoneRow, TaskRow } from '../../components/TaskRow';
 import { Card, Empty, SectionTitle } from '../../components/ui';
+import { confirmUndo } from '../../lib/confirm';
 import { longDate, todayKey } from '../../lib/dates';
 import { useStore } from '../../lib/store';
 import { blankTask, byTime } from '../../lib/tasks';
@@ -24,7 +25,7 @@ function greeting(): string {
 export default function TodayScreen() {
   const t = useTheme();
   const insets = useSafeAreaInsets();
-  const { tasks, completions, settings, today, save, complete, undo, postpone } = useStore();
+  const { tasks, completions, settings, today, save, complete, undo, canUndo, postpone } = useStore();
   const [quick, setQuick] = useState('');
 
   const overdue = useMemo(() => tasks.filter((x) => !x.done && x.date < today).sort(byTime), [tasks, today]);
@@ -96,7 +97,7 @@ export default function TodayScreen() {
             <SectionTitle>Bugün bitenler</SectionTitle>
             <Card>
               {doneToday.map((c) => (
-                <DoneRow key={c.id} title={c.title} onUndo={() => undo(c.id)} />
+                <DoneRow key={c.id} title={c.title} onUndo={canUndo(c.id) ? () => confirmUndo(c.title, () => undo(c.id)) : undefined} />
               ))}
             </Card>
           </>

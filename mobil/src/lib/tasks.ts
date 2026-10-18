@@ -89,6 +89,16 @@ export function completeTask(task: Task, now: number): { task: Task; completion:
   return { task: { ...task, date: next ?? task.date, snoozeUntil: null }, completion };
 }
 
+// A finished one-off task can always be reopened. A repeating task has moved on, so only
+// its latest completion can be undone; undoing an older one would send it back in time.
+export function canUndo(completion: Completion, tasks: Task[], completions: Completion[]): boolean {
+  const task = tasks.find((t) => t.id === completion.taskId);
+  if (!task) return false;
+  if (!isRepeating(task)) return task.done;
+  const latest = completions.filter((c) => c.taskId === task.id).reduce((a, b) => (b.doneAt > a.doneAt ? b : a), completion);
+  return latest.id === completion.id;
+}
+
 // Reverses `completeTask`.
 export function uncompleteTask(task: Task, completion: Completion): Task {
   return { ...task, date: completion.date, done: false, doneAt: null };

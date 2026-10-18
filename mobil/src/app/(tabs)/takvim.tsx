@@ -7,6 +7,7 @@ import { Fab } from '../../components/Fab';
 import { MonthGrid } from '../../components/MonthGrid';
 import { DoneRow, TaskRow } from '../../components/TaskRow';
 import { Card, Empty, SectionTitle } from '../../components/ui';
+import { confirmUndo } from '../../lib/confirm';
 import { fromKey, longDate, pad, todayKey } from '../../lib/dates';
 import { useStore } from '../../lib/store';
 import { byTime, occursOn } from '../../lib/tasks';
@@ -15,7 +16,7 @@ import { useTheme } from '../../lib/theme';
 export default function CalendarScreen() {
   const t = useTheme();
   const insets = useSafeAreaInsets();
-  const { tasks, completions, today, complete, undo } = useStore();
+  const { tasks, completions, today, complete, undo, canUndo } = useStore();
   const [selected, setSelected] = useState(today);
   const [view, setView] = useState(() => {
     const d = fromKey(today);
@@ -71,9 +72,8 @@ export default function CalendarScreen() {
             // Later repeats show the task, but only its current occurrence can be ticked.
             <TaskRow key={x.id} task={x} today={today} onComplete={x.date === selected ? () => complete(x.id) : undefined} />
           ))}
-          {/* Only today's completions can be undone; older ones are history. */}
           {dayDone.map((c) => (
-            <DoneRow key={c.id} title={c.title} sub={`${time(c.doneAt)} bitti`} onUndo={todayKey(c.doneAt) === today ? () => undo(c.id) : undefined} />
+            <DoneRow key={c.id} title={c.title} sub={`${time(c.doneAt)} bitti`} onUndo={canUndo(c.id) ? () => confirmUndo(c.title, () => undo(c.id)) : undefined} />
           ))}
           {!dayTasks.length && !dayDone.length && <Empty title="Bu gün boş" hint={selected < today ? 'Bu gün biten bir iş yok.' : '+ ile bu güne iş ekleyebilirsin.'} />}
         </Card>

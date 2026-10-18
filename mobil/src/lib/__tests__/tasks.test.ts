@@ -2,7 +2,7 @@ import { describe, expect, it } from '@jest/globals';
 
 import { at } from '../dates';
 import { planNotifications } from '../plan';
-import { blankTask, completeTask, moveToTomorrow, nextOccurrence, occursOn, uncompleteTask } from '../tasks';
+import { blankTask, canUndo, completeTask, moveToTomorrow, nextOccurrence, occursOn, uncompleteTask } from '../tasks';
 import { DEFAULT_SETTINGS, type Task } from '../types';
 
 function task(over: Partial<Task>): Task {
@@ -72,6 +72,18 @@ describe('completeTask', () => {
   it('finishing a future repeat early moves past it', () => {
     const t = task({ date: '2026-10-19', startDate: '2026-10-12', repeat: { kind: 'weekly', weekdays: [] } });
     expect(completeTask(t, now).task.date).toBe('2026-10-26');
+  });
+
+  it('undoes any one-off completion but only the latest repeat', () => {
+    const one = completeTask(task({ id: 'one' }), now);
+    expect(canUndo(one.completion, [one.task], [one.completion])).toBe(true);
+    const daily = task({ id: 'd', repeat: { kind: 'daily', weekdays: [] } });
+    const first = completeTask(daily, now);
+    const second = completeTask(first.task, now + 1000);
+    const all = [first.completion, second.completion];
+    expect(canUndo(first.completion, [second.task], all)).toBe(false);
+    expect(canUndo(second.completion, [second.task], all)).toBe(true);
+    expect(canUndo(one.completion, [], [one.completion])).toBe(false);
   });
 
   it('clears a snooze', () => {

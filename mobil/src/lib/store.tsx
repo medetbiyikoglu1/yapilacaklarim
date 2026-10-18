@@ -6,7 +6,7 @@ import { todayKey } from './dates';
 import { applyPlan, askPermission, onNotificationAction, setupNotifications, type NotificationAction } from './notifications';
 import { planNotifications } from './plan';
 import * as storage from './storage';
-import { completeTask, moveToTomorrow, uncompleteTask } from './tasks';
+import { canUndo as canUndoCompletion, completeTask, moveToTomorrow, uncompleteTask } from './tasks';
 import { KEEP_DONE_DAYS, type Completion, type Settings, type Task } from './types';
 
 type Store = {
@@ -18,6 +18,7 @@ type Store = {
   remove: (id: string) => void;
   complete: (id: string) => void;
   undo: (completionId: string) => void;
+  canUndo: (completionId: string) => boolean;
   postpone: (id: string) => void;
   snooze: (id: string, minutes: number) => void;
   updateSettings: (s: Partial<Settings>) => void;
@@ -97,6 +98,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     [putTask],
   );
 
+  const canUndo = useCallback(
+    (completionId: string) => {
+      const c = completions.find((x) => x.id === completionId);
+      return !!c && canUndoCompletion(c, tasks, completions);
+    },
+    [tasks, completions],
+  );
+
   const postpone = useCallback(
     (id: string) => {
       const task = ref.current.tasks.find((t) => t.id === id);
@@ -155,8 +164,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, [reschedule]);
 
   const value = useMemo(
-    () => ({ tasks, completions, settings, today, save, remove, complete, undo, postpone, snooze, updateSettings }),
-    [tasks, completions, settings, today, save, remove, complete, undo, postpone, snooze, updateSettings],
+    () => ({ tasks, completions, settings, today, save, remove, complete, undo, canUndo, postpone, snooze, updateSettings }),
+    [tasks, completions, settings, today, save, remove, complete, undo, canUndo, postpone, snooze, updateSettings],
   );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

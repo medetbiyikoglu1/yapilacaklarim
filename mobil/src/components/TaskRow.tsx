@@ -67,7 +67,12 @@ export function TaskRow({ task, today, showDate, onComplete, onPostpone }: Props
 export function DoneRow({ title, sub, onUndo }: { title: string; sub?: string; onUndo?: () => void }) {
   const t = useTheme();
   return (
-    <View style={[styles.row, { borderBottomColor: t.line }]}>
+    <Pressable
+      onPress={onUndo}
+      disabled={!onUndo}
+      accessibilityHint={onUndo ? 'Geri almak için dokun' : undefined}
+      style={({ pressed }) => [styles.row, { borderBottomColor: t.line, opacity: pressed ? 0.6 : 1 }]}
+    >
       <View style={styles.bar} />
       <View style={[styles.check, styles.checkDone, { backgroundColor: t.success, borderColor: t.success }]}>
         <Icon name="check" size={14} color="#fff" strokeWidth={2.6} />
@@ -79,11 +84,12 @@ export function DoneRow({ title, sub, onUndo }: { title: string; sub?: string; o
         {sub ? <Text style={[styles.metaText, { color: t.muted }]}>{sub}</Text> : null}
       </View>
       {onUndo && (
-        <Pressable onPress={onUndo} hitSlop={10} accessibilityLabel="Geri al" style={styles.undo}>
-          <Icon name="undo" size={18} color={t.muted} />
-        </Pressable>
+        <View style={[styles.postpone, { backgroundColor: t.card2 }]}>
+          <Icon name="undo" size={14} color={t.muted} />
+          <Text style={[styles.postponeText, { color: t.muted }]}>Geri al</Text>
+        </View>
       )}
-    </View>
+    </Pressable>
   );
 }
 
@@ -107,5 +113,4 @@ const styles = StyleSheet.create({
   metaText: { fontSize: 13 },
   postpone: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 999 },
   postponeText: { fontSize: 13, fontWeight: '500' },
-  undo: { padding: 4 },
 });
