@@ -26,9 +26,12 @@ npx expo start
 
 ## Kendi iPhone'una kurmak (Mac gerekir)
 
-1. Mac'e [Xcode](https://apps.apple.com/app/xcode/id497799835) ve [Node.js](https://nodejs.org) (22 veya üstü) kur.
-2. iPhone'u kabloyla Mac'e bağla; iPhone'da **Ayarlar › Gizlilik ve Güvenlik › Geliştirici Modu**'nu aç.
-3. Terminalde:
+Ücretsiz Apple hesabıyla kurulan uygulama 7 gün çalışır, sonra aynı adımlarla yeniden kurulur. Apple Geliştirici Programı'na katılınca bu sınır kalkar ve TestFlight ile kurulur.
+
+1. Mac'e App Store'dan **Xcode**'u kur, bir kez aç ve istediği ek bileşenleri yükle.
+2. Xcode › **Settings › Accounts**'ta **+** ile Apple hesabını ekle.
+3. iPhone'u kabloyla Mac'e bağla, telefonda "Bu bilgisayara güven" de. iPhone'da **Ayarlar › Gizlilik ve Güvenlik › Geliştirici Modu**'nu aç (telefon yeniden başlar).
+4. Terminalde:
 
    ```bash
    cd mobil
@@ -36,7 +39,8 @@ npx expo start
    npx expo run:ios --device
    ```
 
-4. Xcode ilk seferde Apple hesabınla imzalama ister: **Signing & Capabilities** sekmesinde *Team* olarak kendi Apple hesabını seç. Ücretsiz hesapla kurulan uygulama 7 günde bir aynı komutla yeniden kurulmalı.
+   Çıkan listeden iPhone'unu seç. İlk seferde imzalama hatası alırsan `open ios/*.xcworkspace` ile projeyi Xcode'da aç, **Yapılacaklarım › Signing & Capabilities**'te *Team* olarak kendi hesabını seç ve komutu tekrar çalıştır.
+5. iPhone'da **Ayarlar › Genel › VPN ve Cihaz Yönetimi**'nde kendi Apple hesabına **Güven** de, sonra uygulamayı aç.
 
 Android telefon için aynı adımlarda `npx expo run:android --device` kullanılır (Android Studio gerekir).
 
