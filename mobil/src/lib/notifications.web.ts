@@ -10,12 +10,7 @@ export async function hasPermission(): Promise<boolean> {
 export async function askPermission(): Promise<boolean> {
   return false;
 }
-export async function exactAlarmsAllowed(): Promise<boolean> {
-  return true;
-}
-export async function askExactAlarms(): Promise<boolean> {
-  return true;
-}
+export async function openExactAlarmSettings(): Promise<void> {}
 export async function applyPlan(_plan: PlannedNotification[]): Promise<void> {}
 export function onNotificationAction(_handler: (a: NotificationAction) => void): () => void {
   return () => {};

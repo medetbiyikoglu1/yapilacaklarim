@@ -1,6 +1,6 @@
 import * as Notifications from 'expo-notifications';
 import { AndroidImportance } from 'expo-notifications';
-import { Platform } from 'react-native';
+import { Linking, Platform } from 'react-native';
 
 import type { PlannedNotification } from './plan';
 
@@ -40,15 +40,15 @@ export async function askPermission(): Promise<boolean> {
   return (await Notifications.requestPermissionsAsync()).granted;
 }
 
-// Android 14+ delays reminders by minutes unless the user allows exact alarms.
-export async function exactAlarmsAllowed(): Promise<boolean> {
-  if (Platform.OS !== 'android') return true;
-  return (await Notifications.getExactAlarmPermissionsAsync()).granted;
-}
-
-export async function askExactAlarms(): Promise<boolean> {
-  if (Platform.OS !== 'android') return true;
-  return (await Notifications.requestExactAlarmPermissionsAsync()).granted;
+// Android 14+ delays reminders by minutes unless the user allows exact alarms
+// ("Alarmlar ve hatırlatıcılar"). This SDK cannot read that setting, so we only open it.
+export async function openExactAlarmSettings(): Promise<void> {
+  if (Platform.OS !== 'android') return;
+  try {
+    await Linking.sendIntent('android.settings.REQUEST_SCHEDULE_EXACT_ALARM');
+  } catch {
+    await Linking.openSettings();
+  }
 }
 
 let queue = Promise.resolve();

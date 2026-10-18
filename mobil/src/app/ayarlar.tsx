@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Linking, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { Card, Chip, ChipRow, SectionTitle } from '../components/ui';
-import { askExactAlarms, askPermission, exactAlarmsAllowed, hasPermission } from '../lib/notifications';
+import { askPermission, hasPermission, openExactAlarmSettings } from '../lib/notifications';
 import { useStore } from '../lib/store';
 import { useTheme } from '../lib/theme';
 import { KEEP_DONE_DAYS, PERSIST_INTERVALS } from '../lib/types';
@@ -14,11 +14,9 @@ export default function SettingsScreen() {
   const t = useTheme();
   const { settings, updateSettings } = useStore();
   const [notify, setNotify] = useState<boolean | null>(null);
-  const [exact, setExact] = useState(true);
 
   const refresh = () => {
     hasPermission().then(setNotify);
-    exactAlarmsAllowed().then(setExact);
   };
   useEffect(refresh, []);
 
@@ -39,12 +37,9 @@ export default function SettingsScreen() {
         {Platform.OS === 'android' && (
           <Row
             title="Tam zamanında uyarı"
-            detail={exact ? 'Açık' : 'Kapalı: hatırlatmalar birkaç dakika gecikebilir'}
-            action={exact ? undefined : 'İzin ver'}
-            onAction={async () => {
-              await askExactAlarms();
-              refresh();
-            }}
+            detail="Kapalıysa hatırlatmalar birkaç dakika gecikebilir. Açılan ekranda Yapılacaklarım'a izin ver."
+            action="Aç"
+            onAction={openExactAlarmSettings}
           />
         )}
       </Card>

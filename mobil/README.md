@@ -12,6 +12,18 @@ iOS ve Android için tek kod tabanı: React Native + Expo (TypeScript). İşler 
 - **Ayarlar:** saatsiz işlerin hatırlatma saati, varsayılan ısrar aralığı ve tekrar sayısı, bildirim izinleri.
 - Biten işler 3 ay saklanır, sonra silinir. Karanlık mod telefonla birlikte değişir.
 
+## Expo Go ile hızlı deneme
+
+Proje Expo SDK 57 kullanıyor; App Store'daki Expo Go bu sürümü açıyor. iPhone'a Expo Go'yu kur, Mac ile aynı Wi-Fi'da olduğundan emin ol, sonra:
+
+```bash
+cd mobil
+npm install
+npx expo start
+```
+
+Çıkan QR kodu iPhone kamerasıyla okut. Bildirimler Expo Go'da da gelir ama başlıkta uygulama adı yerine "Expo Go" görünür.
+
 ## Kendi iPhone'una kurmak (Mac gerekir)
 
 1. Mac'e [Xcode](https://apps.apple.com/app/xcode/id497799835) ve [Node.js](https://nodejs.org) (22 veya üstü) kur.
