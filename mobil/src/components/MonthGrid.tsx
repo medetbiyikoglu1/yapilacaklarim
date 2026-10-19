@@ -23,6 +23,10 @@ export function MonthGrid({ year, month, selected, today, onSelect, onMonth, dot
   const cells: (string | null)[] = Array(lead).fill(null);
   for (let d = 1; d <= daysInMonth(year, month); d++) cells.push(toKey(new Date(year, month, d)));
   while (cells.length % 7) cells.push(null);
+  // Explicit rows: percentage widths in a wrapping row can round past 100% on iOS
+  // and push Sunday onto the next line.
+  const weeks: (string | null)[][] = [];
+  for (let i = 0; i < cells.length; i += 7) weeks.push(cells.slice(i, i + 7));
 
   return (
     <View>
@@ -44,28 +48,30 @@ export function MonthGrid({ year, month, selected, today, onSelect, onMonth, dot
           </Text>
         ))}
       </View>
-      <View style={styles.grid}>
-        {cells.map((key, i) => {
-          if (!key) return <View key={i} style={styles.cell} />;
-          const isSel = key === selected;
-          const isToday = key === today;
-          const marks = dots?.(key) ?? [];
-          return (
-            <Pressable key={key} onPress={() => onSelect(key)} style={styles.cell} accessibilityLabel={key}>
-              <View style={[styles.day, isSel && { backgroundColor: t.accent }, !isSel && isToday && { backgroundColor: t.accentSoft }]}>
-                <Text style={[styles.dayText, { color: isSel ? t.onAccent : isToday ? t.tint : key < today ? t.muted : t.text }, (isSel || isToday) && styles.bold]}>
-                  {Number(key.slice(8))}
-                </Text>
-              </View>
-              <View style={styles.dots}>
-                {marks.slice(0, 3).map((c, j) => (
-                  <View key={j} style={[styles.dot, { backgroundColor: c }]} />
-                ))}
-              </View>
-            </Pressable>
-          );
-        })}
-      </View>
+      {weeks.map((week, w) => (
+        <View key={w} style={styles.week}>
+          {week.map((key, i) => {
+            if (!key) return <View key={i} style={styles.cell} />;
+            const isSel = key === selected;
+            const isToday = key === today;
+            const marks = dots?.(key) ?? [];
+            return (
+              <Pressable key={key} onPress={() => onSelect(key)} style={styles.cell} accessibilityLabel={key}>
+                <View style={[styles.day, isSel && { backgroundColor: t.accent }, !isSel && isToday && { backgroundColor: t.accentSoft }]}>
+                  <Text style={[styles.dayText, { color: isSel ? t.onAccent : isToday ? t.tint : key < today ? t.muted : t.text }, (isSel || isToday) && styles.bold]}>
+                    {Number(key.slice(8))}
+                  </Text>
+                </View>
+                <View style={styles.dots}>
+                  {marks.slice(0, 3).map((c, j) => (
+                    <View key={j} style={[styles.dot, { backgroundColor: c }]} />
+                  ))}
+                </View>
+              </Pressable>
+            );
+          })}
+        </View>
+      ))}
     </View>
   );
 }
@@ -76,8 +82,7 @@ const styles = StyleSheet.create({
   title: { fontSize: 17, fontWeight: '700' },
   week: { flexDirection: 'row' },
   weekday: { flex: 1, textAlign: 'center', fontSize: 12, fontWeight: '600', paddingVertical: 4 },
-  grid: { flexDirection: 'row', flexWrap: 'wrap' },
-  cell: { width: `${100 / 7}%`, alignItems: 'center', paddingVertical: 3, height: 50 },
+  cell: { flex: 1, alignItems: 'center', paddingVertical: 3, height: 50 },
   day: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
   dayText: { fontSize: 16 },
   bold: { fontWeight: '700' },
