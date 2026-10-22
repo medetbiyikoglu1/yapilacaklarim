@@ -112,6 +112,14 @@ function possessive(word: string): boolean {
   return /[ıiuü]$/.test(word) && !/^\d/.test(word);
 }
 
+// After a day ("cuma akşam …") only the endings that surely make a compound count, since
+// "cuma akşam annemi ara" ends the same way: -sı/-ğı ("yemeği", "toplantısı") and a few
+// common words.
+const COMPOUNDS = ['sporu', 'kremi', 'namazı', 'ezanı', 'yürüyüşü', 'dersi', 'mesaisi', 'vardiyası', 'nöbeti'];
+function surelyCompound(word: string): boolean {
+  return /[sğ][ıiuü]$/.test(word) || COMPOUNDS.includes(word);
+}
+
 type Day =
   | { kind: 'date'; key: string }
   | { kind: 'calendar'; day: number; month: number; year?: number }
@@ -231,8 +239,8 @@ function readAt(toks: Token[], i: number, f: Found, now: Date, today: string, af
       f.time = hm(Number(w(1)), 0);
       return 2;
     }
-    // "akşam yemeği" is a meal, not a time; "cuma akşam annemi ara" is a time.
-    if (!afterMatch && possessive(w(1))) return 0;
+    // "akşam yemeği" is a meal, not a time, also after a day: "cuma akşam yemeği".
+    if (afterMatch ? surelyCompound(w(1)) : possessive(w(1))) return 0;
     f.period = PERIODS[p];
     return 1;
   }

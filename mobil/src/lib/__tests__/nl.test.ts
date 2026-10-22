@@ -124,7 +124,11 @@ describe('parseQuickAdd: after the first test round', () => {
   it('N3: leaves day parts that name a thing', () => {
     expect(parse('sabah sporu')).toMatchObject({ title: 'sabah sporu', time: null });
     expect(parse('gece kremi al')).toMatchObject({ title: 'gece kremi al', time: null });
-    expect(parse('yarın akşam yemeği')).toMatchObject({ title: 'yemeği', time: '19:00', date: '2026-10-23' });
+    expect(parse('yarın akşam yemeği')).toMatchObject({ title: 'akşam yemeği', time: null, date: '2026-10-23' });
+    expect(parse('cuma akşam yemeği')).toMatchObject({ title: 'akşam yemeği', time: null, date: '2026-10-23' });
+    expect(parse('cuma sabah sporu')).toMatchObject({ title: 'sabah sporu', time: null, date: '2026-10-23' });
+    expect(parse('yarın akşam toplantısı')).toMatchObject({ title: 'akşam toplantısı', time: null });
+    expect(parse('cuma akşam annemi ara')).toMatchObject({ title: 'annemi ara', time: '19:00' });
     expect(parse('akşam ara')).toMatchObject({ title: 'ara', time: '19:00' });
     expect(parse('spor sabah')).toMatchObject({ title: 'spor', time: '09:00' });
   });
