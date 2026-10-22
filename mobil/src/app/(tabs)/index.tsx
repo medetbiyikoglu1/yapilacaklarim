@@ -25,7 +25,7 @@ function greeting(): string {
 export default function TodayScreen() {
   const t = useTheme();
   const insets = useSafeAreaInsets();
-  const { tasks, completions, settings, today, save, complete, undo, canUndo, postpone } = useStore();
+  const { tasks, completions, settings, today, save, complete, undo, canUndo, postpone, openSnooze } = useStore();
   const [quick, setQuick] = useState('');
 
   const overdue = useMemo(() => tasks.filter((x) => !x.done && x.date < today).sort(byTime), [tasks, today]);
@@ -77,7 +77,7 @@ export default function TodayScreen() {
             <SectionTitle color={t.danger}>Gecikenler</SectionTitle>
             <Card>
               {overdue.map((x) => (
-                <TaskRow key={x.id} task={x} today={today} onComplete={() => complete(x.id)} onPostpone={() => postpone(x.id)} />
+                <TaskRow key={x.id} task={x} today={today} onComplete={() => complete(x.id)} onPostpone={() => postpone(x.id)} onSnoozeMenu={() => openSnooze(x.id)} />
               ))}
             </Card>
           </>
@@ -86,7 +86,7 @@ export default function TodayScreen() {
         <SectionTitle>Bugün</SectionTitle>
         <Card>
           {due.length ? (
-            due.map((x) => <TaskRow key={x.id} task={x} today={today} onComplete={() => complete(x.id)} onPostpone={() => postpone(x.id)} />)
+            due.map((x) => <TaskRow key={x.id} task={x} today={today} onComplete={() => complete(x.id)} onPostpone={() => postpone(x.id)} onSnoozeMenu={() => openSnooze(x.id)} />)
           ) : (
             <Empty title={doneToday.length ? 'Bugünlük hepsi bitti' : 'Bugün boş'} hint={doneToday.length ? 'Eline sağlık.' : 'Yukarıdan hızlıca ya da + ile ayrıntılı ekleyebilirsin.'} />
           )}

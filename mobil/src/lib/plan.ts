@@ -1,4 +1,5 @@
 import { addDays, at, toKey } from './dates';
+import { EVENING_HIDDEN_FROM } from './snooze';
 import { isRepeating, matchesRepeat } from './tasks';
 import type { Settings, Task } from './types';
 
@@ -10,7 +11,17 @@ export type PlannedNotification = {
   title: string;
   body: string;
   persistent: boolean; // a repeat of an already fired reminder
+  category: NotificationCategory;
 };
+
+// Notification button sets. A notification firing late in the day leaves out "Bu akşam".
+export const CATEGORY_TASK = 'task';
+export const CATEGORY_LATE = 'task_late';
+export type NotificationCategory = typeof CATEGORY_TASK | typeof CATEGORY_LATE;
+
+export function categoryFor(fireAt: number): NotificationCategory {
+  return fireAt < at(toKey(new Date(fireAt)), EVENING_HIDDEN_FROM) ? CATEGORY_TASK : CATEGORY_LATE;
+}
 
 // iOS keeps at most 64 pending notifications per app; leave room for a few spares.
 export const MAX_PLANNED = 60;
@@ -45,14 +56,16 @@ function bodyFor(task: Task, minutesBefore: number, nth: number): string {
 export function planNotifications(tasks: Task[], settings: Settings, now: number): PlannedNotification[] {
   const today = toKey(new Date(now));
   const until = addDays(today, WINDOW_DAYS);
-  const out: PlannedNotification[] = [];
+  const out: Omit<PlannedNotification, 'category'>[] = [];
 
   for (const task of tasks) {
-    if (task.done || task.reminders.length === 0) continue;
+    // A task without reminders still gets the one its snooze asked for.
+    if (task.done || (task.reminders.length === 0 && task.snoozeUntil == null)) continue;
     for (const date of occurrencesBetween(task, addDays(today, -1), until)) {
       const due = at(date, timeLabel(task, settings));
       const current = date === task.date;
       const snoozed = current && task.snoozeUntil != null;
+      if (!snoozed && task.reminders.length === 0) continue;
       // The moment the persistent chain counts from: the task time, or the snooze.
       let anchor = due;
 
@@ -78,5 +91,6 @@ export function planNotifications(tasks: Task[], settings: Settings, now: number
   return out
     .filter((n) => n.at > now)
     .sort((a, b) => a.at - b.at)
-    .slice(0, MAX_PLANNED);
+    .slice(0, MAX_PLANNED)
+    .map((n) => ({ ...n, category: categoryFor(n.at) }));
 }

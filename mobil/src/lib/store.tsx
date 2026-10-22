@@ -5,6 +5,7 @@ import { AppState } from 'react-native';
 import { todayKey } from './dates';
 import { applyPlan, askPermission, onNotificationAction, setupNotifications, type NotificationAction } from './notifications';
 import { planNotifications } from './plan';
+import { snoozeOptions, snoozeTask, type SnoozeOption } from './snooze';
 import * as storage from './storage';
 import { canUndo as canUndoCompletion, completeTask, moveToTomorrow, uncompleteTask } from './tasks';
 import { KEEP_DONE_DAYS, type Completion, type Settings, type Task } from './types';
@@ -20,7 +21,11 @@ type Store = {
   undo: (completionId: string) => void;
   canUndo: (completionId: string) => boolean;
   postpone: (id: string) => void;
-  snooze: (id: string, minutes: number) => void;
+  snooze: (id: string, option: SnoozeOption) => void;
+  // The task whose snooze picker is open, with the choices offered when it opened.
+  snoozing: { task: Task; options: SnoozeOption[] } | null;
+  openSnooze: (id: string) => void;
+  closeSnooze: () => void;
   updateSettings: (s: Partial<Settings>) => void;
 };
 
@@ -41,6 +46,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [completions, setCompletions] = useState(initial.completions);
   const [settings, setSettings] = useState(initial.settings);
   const [today, setToday] = useState(todayKey());
+  const [picker, setPicker] = useState<{ id: string; openedAt: number } | null>(null);
 
   // Latest state for callbacks that outlive a render (notification taps).
   const ref = useRef({ tasks, completions, settings });
@@ -115,12 +121,19 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   );
 
   const snooze = useCallback(
-    (id: string, minutes: number) => {
+    (id: string, option: SnoozeOption) => {
       const task = ref.current.tasks.find((t) => t.id === id);
-      if (task) putTask({ ...task, snoozeUntil: Date.now() + minutes * 60000 });
+      if (task) putTask(snoozeTask(task, option, ref.current.settings, Date.now()));
     },
     [putTask],
   );
+
+  const snoozing = useMemo(() => {
+    const task = picker && tasks.find((t) => t.id === picker.id && !t.done);
+    return task ? { task, options: snoozeOptions(picker.openedAt) } : null;
+  }, [tasks, picker]);
+  const openSnooze = useCallback((id: string) => setPicker({ id, openedAt: Date.now() }), []);
+  const closeSnooze = useCallback(() => setPicker(null), []);
 
   const updateSettings = useCallback((s: Partial<Settings>) => {
     setSettings((cur) => {
@@ -135,9 +148,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     const handle = (a: NotificationAction) => {
       const task = ref.current.tasks.find((t) => t.id === a.taskId);
       if (!task) return;
-      if (a.action === 'done' && task.date === a.date) complete(task.id);
-      else if (a.action === 'snooze' && task.date === a.date) snooze(task.id, 60);
-      else if (a.action === 'open') router.push({ pathname: '/is', params: { id: task.id } });
+      if (a.action === 'open') router.push({ pathname: '/is', params: { id: task.id } });
+      else if (task.done || task.date !== a.date) return;
+      else if (a.action === 'done') complete(task.id);
+      else if (a.action === 'snooze') snooze(task.id, a.option);
+      else if (a.action === 'pick') openSnooze(task.id);
     };
     let off = () => {};
     setupNotifications()
@@ -147,7 +162,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       })
       .catch((e) => console.warn('Bildirim kurulumu', e));
     return () => off();
-  }, [complete, snooze, reschedule]);
+  }, [complete, snooze, openSnooze, reschedule]);
 
   // Coming back to the app: the day may have changed and fired reminders need replacing.
   useEffect(() => {
@@ -164,8 +179,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, [reschedule]);
 
   const value = useMemo(
-    () => ({ tasks, completions, settings, today, save, remove, complete, undo, canUndo, postpone, snooze, updateSettings }),
-    [tasks, completions, settings, today, save, remove, complete, undo, canUndo, postpone, snooze, updateSettings],
+    () => ({ tasks, completions, settings, today, save, remove, complete, undo, canUndo, postpone, snooze, snoozing, openSnooze, closeSnooze, updateSettings }),
+    [tasks, completions, settings, today, save, remove, complete, undo, canUndo, postpone, snooze, snoozing, openSnooze, closeSnooze, updateSettings],
   );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

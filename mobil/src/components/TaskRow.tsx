@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { relativeDay } from '../lib/dates';
+import { pad, relativeDay } from '../lib/dates';
 import { isRepeating } from '../lib/tasks';
 import { useTheme } from '../lib/theme';
 import type { Task } from '../lib/types';
@@ -14,14 +14,22 @@ type Props = {
   // Missing for a later repeat, which cannot be ticked before its turn.
   onComplete?: () => void;
   onPostpone?: () => void;
+  // Long press on "Yarın": the snooze picker.
+  onSnoozeMenu?: () => void;
 };
 
-export function TaskRow({ task, today, showDate, onComplete, onPostpone }: Props) {
+function clock(ms: number): string {
+  const d = new Date(ms);
+  return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+export function TaskRow({ task, today, showDate, onComplete, onPostpone, onSnoozeMenu }: Props) {
   const t = useTheme();
   const overdue = task.date < today;
-  const meta: { icon: 'clock' | 'repeat' | 'bellRing' | 'cal'; text?: string; color?: string }[] = [];
+  const meta: { icon: 'clock' | 'repeat' | 'bellRing' | 'cal' | 'snooze'; text?: string; color?: string }[] = [];
   if (showDate || overdue) meta.push({ icon: 'cal', text: relativeDay(task.date, today), color: overdue ? t.danger : undefined });
   if (task.time) meta.push({ icon: 'clock', text: task.time });
+  if (task.snoozeUntil != null) meta.push({ icon: 'snooze', text: `Ertelendi · ${clock(task.snoozeUntil)}` });
   if (isRepeating(task)) meta.push({ icon: 'repeat' });
   if (task.persistent) meta.push({ icon: 'bellRing' });
 
@@ -55,7 +63,13 @@ export function TaskRow({ task, today, showDate, onComplete, onPostpone }: Props
         )}
       </View>
       {onPostpone && (
-        <Pressable onPress={onPostpone} hitSlop={8} accessibilityLabel="Yarına at" style={[styles.postpone, { backgroundColor: t.card2 }]}>
+        <Pressable
+          onPress={onPostpone}
+          onLongPress={onSnoozeMenu}
+          hitSlop={8}
+          accessibilityLabel="Yarına at"
+          accessibilityHint={onSnoozeMenu ? 'Diğer erteleme seçenekleri için basılı tut' : undefined}
+          style={[styles.postpone, { backgroundColor: t.card2 }]}>
           <Text style={[styles.postponeText, { color: t.muted }]}>Yarın</Text>
           <Icon name="snooze" size={14} color={t.muted} />
         </Pressable>

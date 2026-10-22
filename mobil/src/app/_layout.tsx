@@ -3,6 +3,7 @@ import { Stack } from 'expo-router/stack';
 import { StatusBar } from 'expo-status-bar';
 import { useColorScheme } from 'react-native';
 
+import { SnoozeSheet } from '../components/SnoozeSheet';
 import { StoreProvider } from '../lib/store';
 import { useTheme } from '../lib/theme';
 
@@ -18,6 +19,7 @@ export default function RootLayout() {
           <Stack.Screen name="is" options={{ presentation: 'modal', headerShown: false }} />
           <Stack.Screen name="ayarlar" options={{ title: 'Ayarlar', headerBackTitle: 'Geri' }} />
         </Stack>
+        <SnoozeSheet />
         <StatusBar style="auto" />
       </StoreProvider>
     </ThemeProvider>
