@@ -73,7 +73,7 @@ export default function TodayScreen() {
             value={quick}
             onChangeText={setQuick}
             onSubmitEditing={addQuick}
-            placeholder="Hızlı ekle: yarın 18:00 fatura öde"
+            placeholder="Hızlı ekle"
             placeholderTextColor={t.muted}
             returnKeyType="done"
             style={[styles.quickInput, { color: t.text }]}
