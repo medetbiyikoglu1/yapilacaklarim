@@ -1,0 +1,60 @@
+{
+  "expo": {
+    "name": "Yapılacaklarım",
+    "slug": "yapilacaklarim",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.medetbiyikoglu.yapilacaklarim"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#121212",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false,
+      "package": "com.medetbiyikoglu.yapilacaklarim",
+      "permissions": [
+        "android.permission.SCHEDULE_EXACT_ALARM",
+        "android.permission.POST_NOTIFICATIONS"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-sqlite",
+      "./plugins/withoutPushEntitlement",
+      "./plugins/withSceneDelegate",
+      [
+        "expo-notifications",
+        {
+          "color": "#FFD400"
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 180,
+          "resizeMode": "contain",
+          "backgroundColor": "#F6F5F1",
+          "dark": {
+            "image": "./assets/splash-icon.png",
+            "backgroundColor": "#0B0B0B"
+          }
+        }
+      ]
+    ],
+    "scheme": "yapilacaklarim",
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

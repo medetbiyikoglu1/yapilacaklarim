@@ -1,5 +1,7 @@
 # Yapılacaklarım
 
+> **Mobil uygulama (iOS ve Android) `mobil/` klasöründe.** Kurulum için [mobil/README.md](mobil/README.md). Aşağıdaki web sürümü (PWA) ilk prototiptir.
+
 iPhone'da ana ekrana eklenen, işlerini takvime planlayıp saati gelince bildirim gönderen yapılacaklar uygulaması.
 
 ## Özellikler
