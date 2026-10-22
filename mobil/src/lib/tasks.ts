@@ -104,9 +104,16 @@ export function uncompleteTask(task: Task, completion: Completion): Task {
   return { ...task, date: completion.date, done: false, doneAt: null };
 }
 
-// "Yarına at": moves the current occurrence to tomorrow.
+// "Yarına at": moves the current occurrence to tomorrow. A repeat left over from an earlier
+// day is closed instead: the task moves on to today's occurrence (or tomorrow's), which is
+// never skipped.
 export function moveToTomorrow(task: Task, now: number): Task {
-  const tomorrow = addDays(toKey(new Date(now)), 1);
+  const today = toKey(new Date(now));
+  const tomorrow = addDays(today, 1);
+  if (isRepeating(task) && task.date < today) {
+    const next = [today, tomorrow].find((k) => matchesRepeat(task, k));
+    if (next) return { ...task, date: next, snoozeUntil: null };
+  }
   const startDate = isRepeating(task) ? task.startDate : tomorrow;
   return { ...task, date: tomorrow, startDate, snoozeUntil: null };
 }

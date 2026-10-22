@@ -2,24 +2,47 @@ import * as Notifications from 'expo-notifications';
 import { AndroidImportance } from 'expo-notifications';
 import { Linking, Platform } from 'react-native';
 
-import type { PlannedNotification } from './plan';
+import { CATEGORY_LATE, CATEGORY_TASK, type PlannedNotification } from './plan';
+import { SNOOZE_LABELS, type SnoozeOption } from './snooze';
 
-export const CATEGORY = 'task';
 export const ACTION_DONE = 'done';
-export const ACTION_SNOOZE = 'snooze';
+// "snooze" was the only snooze button before and still means an hour on old notifications.
+const SNOOZE_ACTIONS: Record<string, SnoozeOption> = {
+  snooze15: '15m',
+  snooze: '1h',
+  evening: 'evening',
+  morning: 'morning',
+};
+const ACTION_PICK = 'pick';
 const CHANNEL = 'hatirlatmalar';
 
-export type NotificationAction = { action: 'done' | 'snooze' | 'open'; taskId: string; date: string };
+export type NotificationAction =
+  | { action: 'done' | 'pick' | 'open'; taskId: string; date: string }
+  | { action: 'snooze'; option: SnoozeOption; taskId: string; date: string };
+
+// Every button opens the app: a background action is dropped when iOS has killed the app.
+function button(identifier: string, buttonTitle: string): Notifications.NotificationAction {
+  return { identifier, buttonTitle, options: { opensAppToForeground: true } };
+}
+
+function snoozeButton(option: SnoozeOption): Notifications.NotificationAction {
+  const id = Object.keys(SNOOZE_ACTIONS).find((k) => SNOOZE_ACTIONS[k] === option)!;
+  return button(id, SNOOZE_LABELS[option]);
+}
+
+// Android shows at most three buttons, so the other choices sit behind "Ertele…".
+function buttons(evening: boolean): Notifications.NotificationAction[] {
+  if (Platform.OS === 'android') return [button(ACTION_DONE, 'Bitti'), snoozeButton('1h'), button(ACTION_PICK, 'Ertele…')];
+  const options: SnoozeOption[] = evening ? ['15m', '1h', 'evening', 'morning'] : ['15m', '1h', 'morning'];
+  return [button(ACTION_DONE, 'Bitti'), ...options.map(snoozeButton)];
+}
 
 export async function setupNotifications(): Promise<void> {
   Notifications.setNotificationHandler({
     handleNotification: async () => ({ shouldShowBanner: true, shouldShowList: true, shouldPlaySound: true, shouldSetBadge: false }),
   });
-  // Both buttons open the app: a background action is dropped when iOS has killed the app.
-  await Notifications.setNotificationCategoryAsync(CATEGORY, [
-    { identifier: ACTION_DONE, buttonTitle: 'Bitti', options: { opensAppToForeground: true } },
-    { identifier: ACTION_SNOOZE, buttonTitle: '1 saat ertele', options: { opensAppToForeground: true } },
-  ]);
+  await Notifications.setNotificationCategoryAsync(CATEGORY_TASK, buttons(true));
+  await Notifications.setNotificationCategoryAsync(CATEGORY_LATE, buttons(false));
   if (Platform.OS === 'android') {
     await Notifications.setNotificationChannelAsync(CHANNEL, {
       name: 'Hatırlatmalar',
@@ -65,7 +88,7 @@ export function applyPlan(plan: PlannedNotification[]): Promise<void> {
           title: n.title,
           body: n.body,
           sound: 'default',
-          categoryIdentifier: CATEGORY,
+          categoryIdentifier: n.category,
           data: { taskId: n.taskId, date: n.date },
         },
         trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: n.at, channelId: CHANNEL },
@@ -78,8 +101,12 @@ export function applyPlan(plan: PlannedNotification[]): Promise<void> {
 function toAction(response: Notifications.NotificationResponse): NotificationAction | null {
   const data = response.notification.request.content.data as { taskId?: string; date?: string } | undefined;
   if (!data?.taskId || !data.date) return null;
-  const action = response.actionIdentifier === ACTION_DONE ? 'done' : response.actionIdentifier === ACTION_SNOOZE ? 'snooze' : 'open';
-  return { action, taskId: data.taskId, date: data.date };
+  const { taskId, date } = data;
+  const id = response.actionIdentifier;
+  if (id === ACTION_DONE) return { action: 'done', taskId, date };
+  if (id === ACTION_PICK) return { action: 'pick', taskId, date };
+  if (id in SNOOZE_ACTIONS) return { action: 'snooze', option: SNOOZE_ACTIONS[id], taskId, date };
+  return { action: 'open', taskId, date };
 }
 
 // Calls `handler` for the tap that launched the app and for every later one.
