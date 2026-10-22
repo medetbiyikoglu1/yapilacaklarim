@@ -9,7 +9,7 @@ import { Icon } from '../../components/Icon';
 import { DoneRow, TaskRow } from '../../components/TaskRow';
 import { Card, Empty, SectionTitle } from '../../components/ui';
 import { confirmUndo } from '../../lib/confirm';
-import { addDays, dayName, fromKey, longDate, monthName, todayKey, weekdayName } from '../../lib/dates';
+import { addDays, at, dayName, fromKey, longDate, monthName, todayKey, weekdayName } from '../../lib/dates';
 import { parseQuickAdd, type QuickAdd } from '../../lib/nl';
 import { useStore } from '../../lib/store';
 import { blankTask, byTime } from '../../lib/tasks';
@@ -79,7 +79,7 @@ export default function TodayScreen() {
             style={[styles.quickInput, { color: t.text }]}
           />
         </Card>
-        {parsed && <QuickPreview parsed={parsed} today={today} />}
+        {parsed && <QuickPreview parsed={parsed} today={today} now={now} />}
 
         {overdue.length > 0 && (
           <>
@@ -143,8 +143,10 @@ function repeatLabel(r: Repeat): string | null {
 }
 
 // What the quick add field will save: "Cuma 23 Ekim · 19:00 · !! Orta · Her hafta".
-function QuickPreview({ parsed, today }: { parsed: QuickAdd; today: string }) {
+function QuickPreview({ parsed, today, now }: { parsed: QuickAdd; today: string; now: number }) {
   const t = useTheme();
+  // Saving is still allowed; the reminder just will not ring.
+  const late = parsed.date < today ? 'Bu tarih geçti' : parsed.time && at(parsed.date, parsed.time) <= now ? 'Bu saat geçti' : null;
   const repeat = repeatLabel(parsed.repeat);
   const parts: { icon?: 'cal' | 'clock' | 'repeat'; text: string; color?: string }[] = [{ icon: 'cal', text: dateLabel(parsed.date, today) }];
   if (parsed.time) parts.push({ icon: 'clock', text: parsed.time });
@@ -158,6 +160,7 @@ function QuickPreview({ parsed, today }: { parsed: QuickAdd; today: string }) {
           <Text style={[styles.previewText, { color: p.color ?? t.muted }]}>{p.text}</Text>
         </View>
       ))}
+      {late && <Text style={[styles.previewText, { color: t.danger }]}>{late}</Text>}
       {!parsed.title && <Text style={[styles.previewText, { color: t.danger }]}>Başlık yaz</Text>}
     </View>
   );

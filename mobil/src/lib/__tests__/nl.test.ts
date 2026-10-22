@@ -23,6 +23,17 @@ const TABLE: [string, string, string, string | null, Priority, Repeat][] = [
   ["9'da ilaç", 'ilaç', '2026-10-23', '09:00', 0, none],
   ['3 kitap oku', '3 kitap oku', '2026-10-22', null, 0, none],
   ['süt al', 'süt al', '2026-10-22', null, 0, none],
+  // Added after the first round of testing (N1–N7)
+  ['1.5 litre su al', '1.5 litre su al', '2026-10-22', null, 0, none],
+  ["gece 1'de uyu", 'uyu', '2026-10-23', '01:00', 0, none],
+  ['gece 10 ilaç', 'ilaç', '2026-10-22', '22:00', 0, none],
+  ['akşam yemeği yap', 'akşam yemeği yap', '2026-10-22', null, 0, none],
+  ['akşam 8 sinema', 'sinema', '2026-10-23', '20:00', 0, none],
+  ['18de spor', 'spor', '2026-10-23', '18:00', 0, none],
+  ['18.05 toplantı', 'toplantı', '2026-10-23', '18:05', 0, none],
+  ['18/05 toplantı', 'toplantı', '2027-05-18', null, 0, none],
+  ['pazartesiye kadar rapor', 'rapor', '2026-10-26', null, 0, none],
+  ['31 şubat parti', '31 şubat parti', '2026-10-22', null, 0, none],
 ];
 
 describe('parseQuickAdd: requirements table', () => {
@@ -45,7 +56,7 @@ describe('parseQuickAdd: days', () => {
   });
 
   it('reads weekdays with case endings', () => {
-    expect(parse('cumaya kadar bitir')).toMatchObject({ title: 'kadar bitir', date: '2026-10-23' });
+    expect(parse('cumaya kadar bitir')).toMatchObject({ title: 'bitir', date: '2026-10-23' });
     expect(parse('salı günü dişçi')).toMatchObject({ title: 'dişçi', date: '2026-10-27' });
     expect(parse('cumartesi piknik')).toMatchObject({ title: 'piknik', date: '2026-10-24' });
     expect(parse('pazartesi rapor')).toMatchObject({ title: 'rapor', date: '2026-10-26' });
@@ -68,7 +79,7 @@ describe('parseQuickAdd: days', () => {
   it('reads calendar dates', () => {
     expect(parse('15 kasım sınav')).toMatchObject({ title: 'sınav', date: '2026-11-15' });
     expect(parse('15 kasımda sınav')).toMatchObject({ title: 'sınav', date: '2026-11-15' });
-    expect(parse('15.11 sınav')).toMatchObject({ title: 'sınav', date: '2026-11-15' });
+    expect(parse('15.11.2026 sınav')).toMatchObject({ title: 'sınav', date: '2026-11-15' });
     expect(parse('15/11 sınav')).toMatchObject({ title: 'sınav', date: '2026-11-15' });
     expect(parse('1 ocak tatil')).toMatchObject({ date: '2027-01-01' });
   });
@@ -93,6 +104,48 @@ describe('parseQuickAdd: times', () => {
   it('keeps bare numbers in the title', () => {
     expect(parse('2 ekmek al')).toMatchObject({ title: '2 ekmek al', time: null, date: '2026-10-22' });
     expect(parse('10 sayfa oku 15 dakika')).toMatchObject({ title: '10 sayfa oku 15 dakika', time: null });
+  });
+});
+
+describe('parseQuickAdd: after the first test round', () => {
+  it('N1: keeps decimals and amounts in the title', () => {
+    expect(parse('2.5 kg elma')).toMatchObject({ title: '2.5 kg elma', time: null, date: '2026-10-22' });
+    expect(parse('3.10 TL öde')).toMatchObject({ title: '3.10 TL öde', time: null, date: '2026-10-22' });
+    expect(parse('1/2 kg un')).toMatchObject({ title: '1/2 kg un', date: '2026-10-22' });
+  });
+
+  it('N2: reads night hours', () => {
+    expect(parse('gece 3te kalk')).toMatchObject({ title: 'kalk', time: '03:00', date: '2026-10-23' });
+    expect(parse("cuma gece 11'de çık")).toMatchObject({ title: 'çık', time: '23:00', date: '2026-10-23' });
+    expect(parse('gece 12 kapat')).toMatchObject({ title: 'kapat', time: '23:59', date: '2026-10-22' });
+    expect(parse('öğlen 1 yemek')).toMatchObject({ title: 'yemek', time: '13:00' });
+  });
+
+  it('N3: leaves day parts that name a thing', () => {
+    expect(parse('sabah sporu')).toMatchObject({ title: 'sabah sporu', time: null });
+    expect(parse('gece kremi al')).toMatchObject({ title: 'gece kremi al', time: null });
+    expect(parse('yarın akşam yemeği')).toMatchObject({ title: 'yemeği', time: '19:00', date: '2026-10-23' });
+    expect(parse('akşam ara')).toMatchObject({ title: 'ara', time: '19:00' });
+    expect(parse('spor sabah')).toMatchObject({ title: 'spor', time: '09:00' });
+  });
+
+  it('N5: reads hours without the apostrophe', () => {
+    expect(parse('9da ilaç')).toMatchObject({ title: 'ilaç', time: '09:00' });
+    expect(parse('yarın 5ta kalk')).toMatchObject({ title: 'kalk', time: '05:00', date: '2026-10-23' });
+  });
+
+  it('N6: a dot is a time unless it has a year', () => {
+    expect(parse('9.30 ders')).toMatchObject({ title: 'ders', time: '09:30', date: '2026-10-23' });
+    expect(parse('18.05.2027 toplantı')).toMatchObject({ title: 'toplantı', date: '2027-05-18', time: null });
+    expect(parse('25.70 x')).toMatchObject({ title: '25.70 x', time: null });
+  });
+
+  it('N7: reads "kadar" and leaves impossible dates', () => {
+    expect(parse('çarşambaya kadar')).toMatchObject({ title: '', date: '2026-10-28' });
+    expect(parse('yarına kadar bitir')).toMatchObject({ title: 'bitir', date: '2026-10-23' });
+    expect(parse('31/04 x')).toMatchObject({ title: '31/04 x', date: '2026-10-22' });
+    expect(parse('29 şubat doğum günü')).toMatchObject({ title: 'doğum günü', date: '2027-02-28' });
+    expect(parse('5 ekim 2025 fatura')).toMatchObject({ title: 'fatura', date: '2025-10-05' });
   });
 });
 
