@@ -2,6 +2,7 @@ import { router } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { pad, relativeDay } from '../lib/dates';
+import { useStore } from '../lib/store';
 import { isRepeating } from '../lib/tasks';
 import { useTheme } from '../lib/theme';
 import type { Task } from '../lib/types';
@@ -25,11 +26,13 @@ function clock(ms: number): string {
 
 export function TaskRow({ task, today, showDate, onComplete, onPostpone, onSnoozeMenu }: Props) {
   const t = useTheme();
+  const { now } = useStore();
   const overdue = task.date < today;
   const meta: { icon: 'clock' | 'repeat' | 'bellRing' | 'cal' | 'snooze'; text?: string; color?: string }[] = [];
   if (showDate || overdue) meta.push({ icon: 'cal', text: relativeDay(task.date, today), color: overdue ? t.danger : undefined });
   if (task.time) meta.push({ icon: 'clock', text: task.time });
-  if (task.snoozeUntil != null) meta.push({ icon: 'snooze', text: `Ertelendi · ${clock(task.snoozeUntil)}` });
+  // Only while the snooze is still ahead.
+  if (task.snoozeUntil != null && task.snoozeUntil > now) meta.push({ icon: 'snooze', text: `Ertelendi · ${clock(task.snoozeUntil)}` });
   if (isRepeating(task)) meta.push({ icon: 'repeat' });
   if (task.persistent) meta.push({ icon: 'bellRing' });
 

@@ -66,17 +66,19 @@ export function planNotifications(tasks: Task[], settings: Settings, now: number
       const current = date === task.date;
       const snoozed = current && task.snoozeUntil != null;
       if (!snoozed && task.reminders.length === 0) continue;
-      // The moment the persistent chain counts from: the task time, or the snooze.
+      // A snooze adds one reminder; the task's own reminders after it still come. The
+      // persistent chain counts from the task time, or from a snooze that is later.
       let anchor = due;
 
       if (snoozed) {
-        anchor = task.snoozeUntil!;
-        out.push({ id: `${task.id}|${date}|snooze`, taskId: task.id, date, at: anchor, title: task.title, body: 'Ertelenen hatırlatma', persistent: false });
-      } else {
-        for (const before of task.reminders) {
-          const t = due - before * 60000;
-          out.push({ id: `${task.id}|${date}|r${before}`, taskId: task.id, date, at: t, title: task.title, body: bodyFor(task, before, 0), persistent: false });
-        }
+        const until = task.snoozeUntil!;
+        if (until >= due || task.reminders.length === 0) anchor = until;
+        out.push({ id: `${task.id}|${date}|snooze`, taskId: task.id, date, at: until, title: task.title, body: 'Ertelenen hatırlatma', persistent: false });
+      }
+      for (const before of task.reminders) {
+        const t = due - before * 60000;
+        if (snoozed && t <= task.snoozeUntil!) continue;
+        out.push({ id: `${task.id}|${date}|r${before}`, taskId: task.id, date, at: t, title: task.title, body: bodyFor(task, before, 0), persistent: false });
       }
 
       if (task.persistent) {

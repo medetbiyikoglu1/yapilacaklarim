@@ -30,7 +30,8 @@ function morningTime(task: Task, settings: Settings): string {
 }
 
 // Postpones the current occurrence. Short snoozes keep the date; "Yarın sabah" moves the
-// task to tomorrow. An evening snooze handled after 19:00 falls back to tomorrow morning.
+// task to tomorrow (an overdue repeat to today's occurrence, see moveToTomorrow). An
+// evening snooze handled after 19:00 falls back to tomorrow morning.
 export function snoozeTask(task: Task, option: SnoozeOption, settings: Settings, now: number): Task {
   const today = toKey(new Date(now));
   switch (option) {
@@ -45,6 +46,8 @@ export function snoozeTask(task: Task, option: SnoozeOption, settings: Settings,
     }
     case 'morning': {
       const moved = moveToTomorrow(task, now);
+      // An overdue repeat that moved to today's occurrence keeps that day's reminders.
+      if (moved.date === today) return moved;
       return { ...moved, snoozeUntil: at(addDays(today, 1), morningTime(task, settings)) };
     }
   }

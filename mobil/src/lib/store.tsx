@@ -15,6 +15,7 @@ type Store = {
   completions: Completion[];
   settings: Settings;
   today: string;
+  now: number; // updated every minute
   save: (task: Task) => void;
   remove: (id: string) => void;
   complete: (id: string) => void;
@@ -46,6 +47,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [completions, setCompletions] = useState(initial.completions);
   const [settings, setSettings] = useState(initial.settings);
   const [today, setToday] = useState(todayKey());
+  const [now, setNow] = useState(Date.now);
   const [picker, setPicker] = useState<{ id: string; openedAt: number } | null>(null);
 
   // Latest state for callbacks that outlive a render (notification taps).
@@ -169,9 +171,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     const sub = AppState.addEventListener('change', (state) => {
       if (state !== 'active') return;
       setToday(todayKey());
+      setNow(Date.now());
       reschedule();
     });
-    const tick = setInterval(() => setToday(todayKey()), 60000);
+    const tick = setInterval(() => {
+      setToday(todayKey());
+      setNow(Date.now());
+    }, 60000);
     return () => {
       sub.remove();
       clearInterval(tick);
@@ -179,8 +185,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, [reschedule]);
 
   const value = useMemo(
-    () => ({ tasks, completions, settings, today, save, remove, complete, undo, canUndo, postpone, snooze, snoozing, openSnooze, closeSnooze, updateSettings }),
-    [tasks, completions, settings, today, save, remove, complete, undo, canUndo, postpone, snooze, snoozing, openSnooze, closeSnooze, updateSettings],
+    () => ({ tasks, completions, settings, today, now, save, remove, complete, undo, canUndo, postpone, snooze, snoozing, openSnooze, closeSnooze, updateSettings }),
+    [tasks, completions, settings, today, now, save, remove, complete, undo, canUndo, postpone, snooze, snoozing, openSnooze, closeSnooze, updateSettings],
   );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

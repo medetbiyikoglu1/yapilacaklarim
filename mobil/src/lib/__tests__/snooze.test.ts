@@ -3,7 +3,7 @@ import { describe, expect, it } from '@jest/globals';
 import { at } from '../dates';
 import { CATEGORY_LATE, CATEGORY_TASK, categoryFor, planNotifications } from '../plan';
 import { snoozeOptions, snoozeTask } from '../snooze';
-import { blankTask, completeTask } from '../tasks';
+import { blankTask, completeTask, moveToTomorrow } from '../tasks';
 import { DEFAULT_SETTINGS, type Task } from '../types';
 
 function task(over: Partial<Task>): Task {
@@ -85,11 +85,41 @@ describe('planNotifications after a snooze', () => {
     expect(planNotifications([t], DEFAULT_SETTINGS, now)[0].at).toBe(at('2026-10-22', '19:00'));
   });
 
-  it('reminds tomorrow morning and nothing today', () => {
+  it('reminds tomorrow morning and at the task time, nothing today', () => {
     const t = snoozeTask(task({ time: '14:30' }), 'morning', DEFAULT_SETTINGS, now);
     const plan = planNotifications([t], DEFAULT_SETTINGS, now);
-    expect(plan).toHaveLength(1);
-    expect(plan[0]).toMatchObject({ at: at('2026-10-23', '09:00'), date: '2026-10-23' });
+    expect(plan.map((p) => [p.at, p.date])).toEqual([
+      [at('2026-10-23', '09:00'), '2026-10-23'],
+      [at('2026-10-23', '14:30'), '2026-10-23'],
+    ]);
+  });
+
+  it('keeps the task time reminder after snoozing an earlier one', () => {
+    // Friday 18:00, reminded a day before and on time; Thursday's reminder is snoozed.
+    const fri = task({ date: '2026-10-23', time: '18:00', reminders: [0, 1440] });
+    const thu = at('2026-10-22', '18:00');
+    const plan = planNotifications([snoozeTask(fri, '15m', DEFAULT_SETTINGS, thu)], DEFAULT_SETTINGS, thu);
+    expect(plan.map((p) => p.at)).toEqual([at('2026-10-22', '18:15'), at('2026-10-23', '18:00')]);
+  });
+
+  it('keeps the task time reminder after a snooze from 30 minutes before', () => {
+    const t = task({ time: '14:00', reminders: [0, 30] });
+    const plan = planNotifications([snoozeTask(t, '15m', DEFAULT_SETTINGS, at('2026-10-22', '13:30'))], DEFAULT_SETTINGS, at('2026-10-22', '13:30'));
+    expect(plan.map((p) => p.at)).toEqual([at('2026-10-22', '13:45'), at('2026-10-22', '14:00')]);
+  });
+
+  it('adds tomorrow morning to a task that is due tomorrow evening', () => {
+    const fri = task({ date: '2026-10-23', time: '18:00', reminders: [0, 1440] });
+    const thu = at('2026-10-22', '18:00');
+    const t = snoozeTask(fri, 'morning', DEFAULT_SETTINGS, thu);
+    expect(t.date).toBe('2026-10-23');
+    expect(planNotifications([t], DEFAULT_SETTINGS, thu).map((p) => p.at)).toEqual([at('2026-10-23', '09:00'), at('2026-10-23', '18:00')]);
+  });
+
+  it('starts the persistent chain at the task time when snoozed before it', () => {
+    const t = task({ time: '14:00', reminders: [0, 30], persistent: true, persistInterval: 5 });
+    const plan = planNotifications([snoozeTask(t, '15m', DEFAULT_SETTINGS, at('2026-10-22', '13:30'))], DEFAULT_SETTINGS, at('2026-10-22', '13:30'));
+    expect(plan.filter((p) => p.persistent)[0].at).toBe(at('2026-10-22', '14:05'));
   });
 
   it('restarts the persistent chain from the snooze, at most persistMax times', () => {
@@ -116,6 +146,23 @@ describe('planNotifications after a snooze', () => {
     const t = snoozeTask(task({ time: '14:00', repeat: { kind: 'daily', weekdays: [] } }), '1h', DEFAULT_SETTINGS, now);
     const next = completeTask(t, now).task;
     expect(next).toMatchObject({ date: '2026-10-23', snoozeUntil: null });
+  });
+
+  it("does not let yesterday's button take away today's repeat", () => {
+    const daily = task({ date: '2026-10-21', startDate: '2026-10-01', time: '10:00', repeat: { kind: 'daily', weekdays: [] } });
+    const morning = snoozeTask(daily, 'morning', DEFAULT_SETTINGS, now);
+    const postponed = moveToTomorrow(daily, now);
+    for (const t of [morning, postponed]) {
+      expect(t).toMatchObject({ date: '2026-10-22', startDate: '2026-10-01', snoozeUntil: null });
+      expect(planNotifications([t], DEFAULT_SETTINGS, at('2026-10-22', '08:00'))[0].at).toBe(at('2026-10-22', '10:00'));
+    }
+  });
+
+  it('moves an overdue weekly repeat to tomorrow when today has no occurrence', () => {
+    // Weekly on Fridays, last Friday missed; today is Thursday.
+    const weekly = task({ date: '2026-10-16', startDate: '2026-10-02', repeat: { kind: 'weekly', weekdays: [5] } });
+    expect(moveToTomorrow(weekly, now).date).toBe('2026-10-23');
+    expect(snoozeTask(weekly, 'morning', DEFAULT_SETTINGS, now)).toMatchObject({ date: '2026-10-23', snoozeUntil: at('2026-10-23', '09:00') });
   });
 
   it('stays within the 60 notification limit', () => {
