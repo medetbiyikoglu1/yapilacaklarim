@@ -49,6 +49,11 @@ export function dayName(key: string): string {
   return DAYS[weekday(key)];
 }
 
+// 0 = Pazar … 6 = Cumartesi
+export function weekdayName(n: number): string {
+  return DAYS[n];
+}
+
 // "17 Ekim Cumartesi"
 export function longDate(key: string): string {
   const d = fromKey(key);
