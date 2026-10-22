@@ -150,12 +150,22 @@ describe('planNotifications after a snooze', () => {
 
   it("does not let yesterday's button take away today's repeat", () => {
     const daily = task({ date: '2026-10-21', startDate: '2026-10-01', time: '10:00', repeat: { kind: 'daily', weekdays: [] } });
-    const morning = snoozeTask(daily, 'morning', DEFAULT_SETTINGS, now);
-    const postponed = moveToTomorrow(daily, now);
+    const early = at('2026-10-22', '08:00');
+    const morning = snoozeTask(daily, 'morning', DEFAULT_SETTINGS, early);
+    const postponed = moveToTomorrow(daily, early);
     for (const t of [morning, postponed]) {
       expect(t).toMatchObject({ date: '2026-10-22', startDate: '2026-10-01', snoozeUntil: null });
       expect(planNotifications([t], DEFAULT_SETTINGS, at('2026-10-22', '08:00'))[0].at).toBe(at('2026-10-22', '10:00'));
     }
+  });
+
+  it("reminds tomorrow morning when today's repeat time has already passed", () => {
+    const daily = task({ date: '2026-10-21', startDate: '2026-10-01', time: '10:00', repeat: { kind: 'daily', weekdays: [] } });
+    const t = snoozeTask(daily, 'morning', DEFAULT_SETTINGS, now);
+    expect(t).toMatchObject({ date: '2026-10-22', snoozeUntil: at('2026-10-23', '09:00') });
+    const plan = planNotifications([t], DEFAULT_SETTINGS, now);
+    expect(plan[0]).toMatchObject({ at: at('2026-10-23', '09:00'), date: '2026-10-22', body: 'Ertelenen hatırlatma' });
+    expect(plan[1]).toMatchObject({ at: at('2026-10-23', '10:00'), date: '2026-10-23' });
   });
 
   it('moves an overdue weekly repeat to tomorrow when today has no occurrence', () => {

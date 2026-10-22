@@ -46,9 +46,11 @@ export function snoozeTask(task: Task, option: SnoozeOption, settings: Settings,
     }
     case 'morning': {
       const moved = moveToTomorrow(task, now);
-      // An overdue repeat that moved to today's occurrence keeps that day's reminders.
-      if (moved.date === today) return moved;
-      return { ...moved, snoozeUntil: at(addDays(today, 1), morningTime(task, settings)) };
+      const morning = at(addDays(today, 1), morningTime(task, settings));
+      // An overdue repeat moves to today's occurrence and keeps that day's reminders; once
+      // today's time has passed, tomorrow morning still gets the reminder that was asked for.
+      if (moved.date === today && now < at(today, task.time ?? settings.defaultTime)) return moved;
+      return { ...moved, snoozeUntil: morning };
     }
   }
 }
