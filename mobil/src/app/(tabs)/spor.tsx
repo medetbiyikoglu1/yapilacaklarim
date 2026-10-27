@@ -3,7 +3,8 @@ import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Icon } from '../../components/Icon';
-import { Card, Empty, SectionTitle } from '../../components/ui';
+import { Card, Chip, ChipRow, Empty, SectionTitle } from '../../components/ui';
+import { REGIONS } from '../../lib/spor';
 import { useStore } from '../../lib/store';
 import { useTheme } from '../../lib/theme';
 
@@ -12,6 +13,8 @@ export default function SporScreen() {
   const insets = useSafeAreaInsets();
   const { exercises, addExercise, toggleExercise, removeExercise, resetWorkout } = useStore();
   const [text, setText] = useState('');
+  const [region, setRegion] = useState<string | null>(null);
+  const moves = REGIONS.find((r) => r.name === region)?.moves ?? [];
   const done = exercises.filter((e) => e.done).length;
 
   const add = () => {
@@ -37,6 +40,35 @@ export default function SporScreen() {
             style={[styles.input, { color: t.text }]}
           />
         </Card>
+
+        <SectionTitle>Hangi bölgeyi çalışacaksın?</SectionTitle>
+        <ChipRow>
+          {REGIONS.map((r) => (
+            <Chip key={r.name} label={r.name} active={region === r.name} onPress={() => setRegion(region === r.name ? null : r.name)} />
+          ))}
+        </ChipRow>
+        {region && (
+          <Card style={styles.picks}>
+            {moves.map((m) => {
+              const added = exercises.find((e) => e.name === m);
+              return (
+                <Pressable
+                  key={m}
+                  onPress={() => (added ? removeExercise(added.id) : addExercise(m))}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: !!added }}
+                  accessibilityLabel={added ? `${m} listeden çıkar` : `${m} ekle`}
+                  style={({ pressed }) => [styles.row, { borderBottomColor: t.line, opacity: pressed ? 0.6 : 1 }]}
+                >
+                  <Text style={[styles.name, { color: t.text }]}>{m}</Text>
+                  <View style={[styles.add, { backgroundColor: added ? t.accent : t.card2 }]}>
+                    <Icon name={added ? 'check' : 'plus'} size={16} color={added ? t.onAccent : t.tint} strokeWidth={2.4} />
+                  </View>
+                </Pressable>
+              );
+            })}
+          </Card>
+        )}
 
         <SectionTitle
           right={
@@ -85,6 +117,8 @@ const styles = StyleSheet.create({
   title: { fontSize: 30, fontWeight: '800', marginBottom: 16 },
   quick: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 14 },
   input: { flex: 1, fontSize: 16, paddingVertical: 14 },
+  picks: { marginTop: 12 },
+  add: { width: 30, height: 30, borderRadius: 15, alignItems: 'center', justifyContent: 'center' },
   reset: { fontSize: 14, fontWeight: '600' },
   row: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 13, paddingHorizontal: 14, borderBottomWidth: StyleSheet.hairlineWidth },
   check: { width: 24, height: 24, borderRadius: 12, borderWidth: 1.8, alignItems: 'center', justifyContent: 'center' },
