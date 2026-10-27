@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@jest/globals';
 
-import { hasSpor, isSporTitle, resetExercises } from '../spor';
+import { hasSpor, isSporTitle, REGIONS, resetExercises } from '../spor';
 import { blankTask } from '../tasks';
 
 describe('isSporTitle', () => {
@@ -32,4 +32,8 @@ describe('hasSpor', () => {
 
 it('resetExercises unticks everything', () => {
   expect(resetExercises([{ id: 'a', name: 'Squat', done: true }])).toEqual([{ id: 'a', name: 'Squat', done: false }]);
+});
+
+it('example moves are unique within each region', () => {
+  for (const r of REGIONS) expect(new Set(r.moves).size).toBe(r.moves.length);
 });
