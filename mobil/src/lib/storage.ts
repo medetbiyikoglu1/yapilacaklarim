@@ -1,6 +1,6 @@
 import * as SQLite from 'expo-sqlite';
 
-import { DEFAULT_SETTINGS, type Completion, type Settings, type Task } from './types';
+import { DEFAULT_SETTINGS, type Completion, type Exercise, type Settings, type Task } from './types';
 
 // Everything lives on the phone. Tasks are stored as JSON so new fields need no
 // migration; the few columns next to it are what queries and cleanup filter on.
@@ -28,14 +28,16 @@ db.execSync(`
   );
 `);
 
-export function loadAll(): { tasks: Task[]; completions: Completion[]; settings: Settings } {
+export function loadAll(): { tasks: Task[]; completions: Completion[]; settings: Settings; exercises: Exercise[] } {
   const tasks = db.getAllSync<{ data: string }>('SELECT data FROM tasks').map((r) => JSON.parse(r.data) as Task);
   const completions = db
     .getAllSync<{ id: string; task_id: string; title: string; date: string; done_at: number }>('SELECT * FROM completions')
     .map((r) => ({ id: r.id, taskId: r.task_id, title: r.title, date: r.date, doneAt: r.done_at }));
   const row = db.getFirstSync<{ value: string }>("SELECT value FROM settings WHERE key = 'settings'");
   const settings = { ...DEFAULT_SETTINGS, ...(row ? JSON.parse(row.value) : {}) };
-  return { tasks, completions, settings };
+  const ex = db.getFirstSync<{ value: string }>("SELECT value FROM settings WHERE key = 'exercises'");
+  const exercises = ex ? (JSON.parse(ex.value) as Exercise[]) : [];
+  return { tasks, completions, settings, exercises };
 }
 
 export function saveTask(task: Task): void {
@@ -65,6 +67,11 @@ export function deleteCompletion(id: string): void {
 
 export function saveSettings(settings: Settings): void {
   db.runSync("INSERT OR REPLACE INTO settings (key, value) VALUES ('settings', ?)", JSON.stringify(settings));
+}
+
+// The Spor list is small and always saved whole, so it sits in the settings table.
+export function saveExercises(list: Exercise[]): void {
+  db.runSync("INSERT OR REPLACE INTO settings (key, value) VALUES ('exercises', ?)", JSON.stringify(list));
 }
 
 // Drops finished work older than the cutoff.

@@ -56,3 +56,11 @@ export const DEFAULT_SETTINGS: Settings = {
 export const PERSIST_INTERVALS = [5, 10, 30, 60];
 export const MAX_REMINDERS = 3;
 export const KEEP_DONE_DAYS = 90;
+
+// One line on the Spor tab: "Bench press 3x10". The list is kept between workouts and
+// "Sıfırla" unticks it for the next one.
+export type Exercise = {
+  id: string;
+  name: string;
+  done: boolean;
+};
