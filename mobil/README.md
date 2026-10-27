@@ -7,6 +7,7 @@ iOS ve Android için tek kod tabanı: React Native + Expo (TypeScript). İşler 
 - **Bugün:** gecikenler, bugünün işleri, bugün bitenler, tek satırlık hızlı ekleme, "Yarın" ile erteleme ve günün ilerleme halkası.
 - **Takvim:** ay görünümü; bir güne basınca o günün işleri ve o gün bitenler görünür.
 - **Tümü:** bitmemiş bütün işler tarihe göre gruplu.
+- **Spor:** başlığında "spor" geçen bir iş varken (ve bittiği gün boyunca) açılan sekme. Sporda yapacağın hareketleri listeler, tikleyebilir, "Sıfırla" ile bir sonraki antrenmana hazırlarsın. Liste sekme gizliyken de saklanır.
 - **İş formu:** tarih, saat, tekrar (her gün, seçili hafta günleri, her ay, her yıl), en fazla 3 hatırlatma, ısrarcı hatırlatma ve öncelik.
 - **Bildirimler:** kilit ekranında **Bitti** ve **1 saat ertele** düğmeleri. Israrcı hatırlatma açık işte, bitti denene kadar seçilen aralıkla (varsayılan 5 dk) en fazla 5 kez daha uyarır.
 - **Ayarlar:** saatsiz işlerin hatırlatma saati, varsayılan ısrar aralığı ve tekrar sayısı, bildirim izinleri.
@@ -58,7 +59,7 @@ npx expo start --web # tarayıcıda hızlı önizleme (bildirim yok, veri taray�
 
 | Yer | Görev |
 | --- | --- |
-| `src/app/` | Ekranlar (Expo Router): `(tabs)/index` Bugün, `(tabs)/takvim`, `(tabs)/tumu`, `is` iş formu, `ayarlar` |
+| `src/app/` | Ekranlar (Expo Router): `(tabs)/index` Bugün, `(tabs)/takvim`, `(tabs)/tumu`, `(tabs)/spor`, `is` iş formu, `ayarlar` |
 | `src/lib/tasks.ts` | Tekrar hesapları, tamamlama, erteleme |
 | `src/lib/plan.ts` | Telefona kurulacak bildirimlerin listesi (en yakın 60 tanesi, 14 gün ileriye kadar) |
 | `src/lib/notifications.ts` | Bildirim izni, planı telefona kurma, Bitti/Ertele düğmeleri |

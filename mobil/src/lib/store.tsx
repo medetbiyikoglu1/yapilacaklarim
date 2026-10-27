@@ -5,10 +5,11 @@ import { AppState } from 'react-native';
 import { todayKey } from './dates';
 import { applyPlan, askPermission, onNotificationAction, setupNotifications, type NotificationAction } from './notifications';
 import { planNotifications } from './plan';
+import { hasSpor, resetExercises } from './spor';
 import { snoozeOptions, snoozeTask, type SnoozeOption } from './snooze';
 import * as storage from './storage';
-import { canUndo as canUndoCompletion, completeTask, moveToTomorrow, uncompleteTask } from './tasks';
-import { KEEP_DONE_DAYS, type Completion, type Settings, type Task } from './types';
+import { canUndo as canUndoCompletion, completeTask, moveToTomorrow, newId, uncompleteTask } from './tasks';
+import { KEEP_DONE_DAYS, type Completion, type Exercise, type Settings, type Task } from './types';
 
 type Store = {
   tasks: Task[];
@@ -28,6 +29,13 @@ type Store = {
   openSnooze: (id: string) => void;
   closeSnooze: () => void;
   updateSettings: (s: Partial<Settings>) => void;
+  // Spor tab: shown while a task mentions "spor".
+  showSpor: boolean;
+  exercises: Exercise[];
+  addExercise: (name: string) => void;
+  toggleExercise: (id: string) => void;
+  removeExercise: (id: string) => void;
+  resetWorkout: () => void;
 };
 
 const Ctx = createContext<Store | null>(null);
@@ -46,6 +54,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [tasks, setTasks] = useState(initial.tasks);
   const [completions, setCompletions] = useState(initial.completions);
   const [settings, setSettings] = useState(initial.settings);
+  const [exercises, setExercises] = useState(initial.exercises);
   const [today, setToday] = useState(todayKey());
   const [now, setNow] = useState(Date.now);
   const [picker, setPicker] = useState<{ id: string; openedAt: number } | null>(null);
@@ -145,6 +154,25 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  const editExercises = useCallback((update: (list: Exercise[]) => Exercise[]) => {
+    setExercises((cur) => {
+      const next = update(cur);
+      storage.saveExercises(next);
+      return next;
+    });
+  }, []);
+  const addExercise = useCallback(
+    (name: string) => {
+      const n = name.trim();
+      if (n) editExercises((all) => [...all, { id: newId(), name: n, done: false }]);
+    },
+    [editExercises],
+  );
+  const toggleExercise = useCallback((id: string) => editExercises((all) => all.map((e) => (e.id === id ? { ...e, done: !e.done } : e))), [editExercises]);
+  const removeExercise = useCallback((id: string) => editExercises((all) => all.filter((e) => e.id !== id)), [editExercises]);
+  const resetWorkout = useCallback(() => editExercises(resetExercises), [editExercises]);
+  const showSpor = useMemo(() => hasSpor(tasks, completions, today), [tasks, completions, today]);
+
   // Notification buttons. A tap on an older occurrence than the task's current one is stale.
   useEffect(() => {
     const handle = (a: NotificationAction) => {
@@ -185,8 +213,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, [reschedule]);
 
   const value = useMemo(
-    () => ({ tasks, completions, settings, today, now, save, remove, complete, undo, canUndo, postpone, snooze, snoozing, openSnooze, closeSnooze, updateSettings }),
-    [tasks, completions, settings, today, now, save, remove, complete, undo, canUndo, postpone, snooze, snoozing, openSnooze, closeSnooze, updateSettings],
+    () => ({
+      tasks, completions, settings, today, now, save, remove, complete, undo, canUndo, postpone, snooze, snoozing, openSnooze, closeSnooze, updateSettings,
+      showSpor, exercises, addExercise, toggleExercise, removeExercise, resetWorkout,
+    }),
+    [
+      tasks, completions, settings, today, now, save, remove, complete, undo, canUndo, postpone, snooze, snoozing, openSnooze, closeSnooze, updateSettings,
+      showSpor, exercises, addExercise, toggleExercise, removeExercise, resetWorkout,
+    ],
   );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

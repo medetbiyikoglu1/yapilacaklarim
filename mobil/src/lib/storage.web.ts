@@ -1,8 +1,8 @@
 // Browser stand-in for storage.ts so the app can be previewed with `expo start --web`.
 // The phone builds use SQLite.
-import { DEFAULT_SETTINGS, type Completion, type Settings, type Task } from './types';
+import { DEFAULT_SETTINGS, type Completion, type Exercise, type Settings, type Task } from './types';
 
-type Data = { tasks: Record<string, Task>; completions: Record<string, Completion>; settings: Settings };
+type Data = { tasks: Record<string, Task>; completions: Record<string, Completion>; settings: Settings; exercises?: Exercise[] };
 
 const KEY = 'yapilacaklarim';
 
@@ -22,9 +22,9 @@ function write(update: (d: Data) => void): void {
   } catch {}
 }
 
-export function loadAll(): { tasks: Task[]; completions: Completion[]; settings: Settings } {
+export function loadAll(): { tasks: Task[]; completions: Completion[]; settings: Settings; exercises: Exercise[] } {
   const d = read();
-  return { tasks: Object.values(d.tasks), completions: Object.values(d.completions), settings: { ...DEFAULT_SETTINGS, ...d.settings } };
+  return { tasks: Object.values(d.tasks), completions: Object.values(d.completions), settings: { ...DEFAULT_SETTINGS, ...d.settings }, exercises: d.exercises ?? [] };
 }
 
 export function saveTask(task: Task): void {
@@ -48,6 +48,10 @@ export function deleteCompletion(id: string): void {
 
 export function saveSettings(settings: Settings): void {
   write((d) => void (d.settings = settings));
+}
+
+export function saveExercises(list: Exercise[]): void {
+  write((d) => void (d.exercises = list));
 }
 
 export function purgeBefore(cutoff: number): void {
