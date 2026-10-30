@@ -37,3 +37,10 @@ it('resetExercises unticks everything', () => {
 it('example moves are unique within each region', () => {
   for (const r of REGIONS) expect(new Set(r.moves).size).toBe(r.moves.length);
 });
+
+it('keeps triceps moves under Arka kol, not Kol', () => {
+  const kol = REGIONS.find((r) => r.name === 'Kol')!.moves;
+  const arka = REGIONS.find((r) => r.name === 'Arka kol')!.moves;
+  expect(kol.some((m) => /triceps|skull|pushdown/i.test(m))).toBe(false);
+  expect(arka).toContain('Triceps pushdown 3x12');
+});
