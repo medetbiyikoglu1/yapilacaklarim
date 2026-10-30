@@ -7,6 +7,7 @@ iOS ve Android için tek kod tabanı: React Native + Expo (TypeScript). İşler 
 - **Bugün:** gecikenler, bugünün işleri, bugün bitenler, tek satırlık hızlı ekleme, "Yarın" ile erteleme ve günün ilerleme halkası.
 - **Takvim:** ay görünümü; bir güne basınca o günün işleri ve o gün bitenler görünür.
 - **Tümü:** bitmemiş bütün işler tarihe göre gruplu.
+- **Antrenman:** Spor sekmesinde hareket ya da program seçilince yanında açılan sekme. Bugünkü hareketleri tikler, "Sıfırla" ile sıfırlar, listeyi program olarak kaydedersin.
 - **Spor:** başlığında "spor" geçen bir iş varken (ve bittiği gün boyunca) açılan sekme. Bölge seçince (göğüs, sırt, omuz, kol, arka kol, bacak, karın, kardiyo) örnek hareketler çıkar, dokunarak listeye eklersin; kendi hareketini de yazabilirsin. Hareketleri tikleyebilir, "Sıfırla" ile bir sonraki antrenmana hazırlarsın. Hazır programlardan (Göğüs + Arka kol, Sırt + Kol, Bacak + Omuz, Tüm vücut, Kardiyo + Karın) birini seçip listeyi doldurabilir, kendi listeni "Program olarak kaydet" ile saklayıp sonra tek dokunuşla yükleyebilirsin; kendi programını basılı tutarak silersin. Liste ve programlar sekme gizliyken de saklanır.
 - **İş formu:** tarih, saat, tekrar (her gün, seçili hafta günleri, her ay, her yıl), en fazla 3 hatırlatma, ısrarcı hatırlatma ve öncelik.
 - **Bildirimler:** kilit ekranında **Bitti** ve **1 saat ertele** düğmeleri. Israrcı hatırlatma açık işte, bitti denene kadar seçilen aralıkla (varsayılan 5 dk) en fazla 5 kez daha uyarır.
