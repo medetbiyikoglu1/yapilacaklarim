@@ -6,7 +6,7 @@ import { useTheme } from '../../lib/theme';
 
 export default function TabsLayout() {
   const t = useTheme();
-  const { showSpor } = useStore();
+  const { showSpor, exercises } = useStore();
   return (
     <Tabs
       screenOptions={{
@@ -24,6 +24,11 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="spor"
         options={{ title: 'Spor', href: showSpor ? undefined : null, tabBarIcon: ({ color }) => <Icon name="dumbbell" color={color} /> }}
+      />
+      {/* Today's workout gets its own tab once something is on the list. */}
+      <Tabs.Screen
+        name="antrenman"
+        options={{ title: 'Antrenman', href: showSpor && exercises.length ? undefined : null, tabBarIcon: ({ color }) => <Icon name="check" color={color} /> }}
       />
     </Tabs>
   );
