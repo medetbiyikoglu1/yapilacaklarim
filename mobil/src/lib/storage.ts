@@ -1,6 +1,6 @@
 import * as SQLite from 'expo-sqlite';
 
-import { DEFAULT_SETTINGS, type Completion, type Exercise, type Settings, type Task } from './types';
+import { DEFAULT_SETTINGS, type Completion, type Exercise, type Program, type Settings, type Task } from './types';
 
 // Everything lives on the phone. Tasks are stored as JSON so new fields need no
 // migration; the few columns next to it are what queries and cleanup filter on.
@@ -28,7 +28,7 @@ db.execSync(`
   );
 `);
 
-export function loadAll(): { tasks: Task[]; completions: Completion[]; settings: Settings; exercises: Exercise[] } {
+export function loadAll(): { tasks: Task[]; completions: Completion[]; settings: Settings; exercises: Exercise[]; programs: Program[] } {
   const tasks = db.getAllSync<{ data: string }>('SELECT data FROM tasks').map((r) => JSON.parse(r.data) as Task);
   const completions = db
     .getAllSync<{ id: string; task_id: string; title: string; date: string; done_at: number }>('SELECT * FROM completions')
@@ -37,7 +37,9 @@ export function loadAll(): { tasks: Task[]; completions: Completion[]; settings:
   const settings = { ...DEFAULT_SETTINGS, ...(row ? JSON.parse(row.value) : {}) };
   const ex = db.getFirstSync<{ value: string }>("SELECT value FROM settings WHERE key = 'exercises'");
   const exercises = ex ? (JSON.parse(ex.value) as Exercise[]) : [];
-  return { tasks, completions, settings, exercises };
+  const pr = db.getFirstSync<{ value: string }>("SELECT value FROM settings WHERE key = 'programs'");
+  const programs = pr ? (JSON.parse(pr.value) as Program[]) : [];
+  return { tasks, completions, settings, exercises, programs };
 }
 
 export function saveTask(task: Task): void {
@@ -72,6 +74,10 @@ export function saveSettings(settings: Settings): void {
 // The Spor list is small and always saved whole, so it sits in the settings table.
 export function saveExercises(list: Exercise[]): void {
   db.runSync("INSERT OR REPLACE INTO settings (key, value) VALUES ('exercises', ?)", JSON.stringify(list));
+}
+
+export function savePrograms(list: Program[]): void {
+  db.runSync("INSERT OR REPLACE INTO settings (key, value) VALUES ('programs', ?)", JSON.stringify(list));
 }
 
 // Drops finished work older than the cutoff.

@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@jest/globals';
 
-import { hasSpor, isSporTitle, REGIONS, resetExercises } from '../spor';
+import { fromProgram, hasSpor, isSporTitle, READY_PROGRAMS, REGIONS, resetExercises } from '../spor';
 import { blankTask } from '../tasks';
 
 describe('isSporTitle', () => {
@@ -43,4 +43,19 @@ it('keeps triceps moves under Arka kol, not Kol', () => {
   const arka = REGIONS.find((r) => r.name === 'Arka kol')!.moves;
   expect(kol.some((m) => /triceps|skull|pushdown/i.test(m))).toBe(false);
   expect(arka).toContain('Triceps pushdown 3x12');
+});
+
+describe('programs', () => {
+  it('a picked program starts unticked with fresh ids', () => {
+    let n = 0;
+    const list = fromProgram(READY_PROGRAMS[0], () => `id${n++}`);
+    expect(list.map((e) => e.name)).toEqual(READY_PROGRAMS[0].moves);
+    expect(list.every((e) => !e.done)).toBe(true);
+    expect(new Set(list.map((e) => e.id)).size).toBe(list.length);
+  });
+
+  it('ready-made moves are all offered under some region', () => {
+    const all = new Set(REGIONS.flatMap((r) => r.moves));
+    for (const p of READY_PROGRAMS) for (const m of p.moves) expect(all.has(m)).toBe(true);
+  });
 });

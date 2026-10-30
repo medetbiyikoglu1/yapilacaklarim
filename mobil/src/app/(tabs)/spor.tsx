@@ -4,18 +4,33 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Icon } from '../../components/Icon';
 import { Card, Chip, ChipRow, Empty, SectionTitle } from '../../components/ui';
-import { REGIONS } from '../../lib/spor';
+import { confirmAsk } from '../../lib/confirm';
+import { READY_PROGRAMS, REGIONS } from '../../lib/spor';
 import { useStore } from '../../lib/store';
 import { useTheme } from '../../lib/theme';
+import type { Program } from '../../lib/types';
 
 export default function SporScreen() {
   const t = useTheme();
   const insets = useSafeAreaInsets();
-  const { exercises, addExercise, toggleExercise, removeExercise, resetWorkout } = useStore();
+  const { exercises, addExercise, toggleExercise, removeExercise, resetWorkout, programs, saveProgram, deleteProgram, loadProgram } = useStore();
+  // Name field for saving the list as a program; null while closed.
+  const [saving, setSaving] = useState<string | null>(null);
   const [text, setText] = useState('');
   const [region, setRegion] = useState<string | null>(null);
   const moves = REGIONS.find((r) => r.name === region)?.moves ?? [];
   const done = exercises.filter((e) => e.done).length;
+
+  const pick = (p: Program) => {
+    if (!exercises.length) return loadProgram(p);
+    confirmAsk(`"${p.name}" yüklensin mi?`, 'Bugünkü listenin yerine bu programın hareketleri gelecek.', 'Yükle', () => loadProgram(p));
+  };
+  const forget = (p: Program) => confirmAsk(`"${p.name}" silinsin mi?`, 'Kayıtlı program silinecek, bugünkü listen değişmez.', 'Sil', () => deleteProgram(p.id), true);
+  const store = () => {
+    if (!saving?.trim()) return;
+    saveProgram(saving);
+    setSaving(null);
+  };
 
   const add = () => {
     addExercise(text);
@@ -40,6 +55,17 @@ export default function SporScreen() {
             style={[styles.input, { color: t.text }]}
           />
         </Card>
+
+        <SectionTitle>Programlar</SectionTitle>
+        <ChipRow>
+          {READY_PROGRAMS.map((p) => (
+            <Chip key={p.id} label={p.name} onPress={() => pick(p)} />
+          ))}
+          {programs.map((p) => (
+            <Chip key={p.id} label={p.name} active onPress={() => pick(p)} onLongPress={() => forget(p)} />
+          ))}
+        </ChipRow>
+        {programs.length > 0 && <Text style={[styles.hint, { color: t.muted }]}>Sarılar senin programların; silmek için basılı tut.</Text>}
 
         <SectionTitle>Hangi bölgeyi çalışacaksın?</SectionTitle>
         <ChipRow>
@@ -106,6 +132,32 @@ export default function SporScreen() {
             <Empty title="Liste boş" hint="Sporda yapacağın hareketleri yukarıdan ekle." />
           )}
         </Card>
+
+        {exercises.length > 0 &&
+          (saving === null ? (
+            <Pressable onPress={() => setSaving('')} style={({ pressed }) => [styles.saveBtn, { backgroundColor: t.accent, opacity: pressed ? 0.7 : 1 }]}>
+              <Text style={[styles.saveText, { color: t.onAccent }]}>Program olarak kaydet</Text>
+            </Pressable>
+          ) : (
+            <Card style={styles.saveCard} inner={styles.quick}>
+              <TextInput
+                value={saving}
+                onChangeText={setSaving}
+                onSubmitEditing={store}
+                autoFocus
+                placeholder="Program adı (ör. Pazartesi göğüs)"
+                placeholderTextColor={t.muted}
+                returnKeyType="done"
+                style={[styles.input, { color: t.text }]}
+              />
+              <Pressable onPress={() => setSaving(null)} hitSlop={8} accessibilityLabel="Vazgeç">
+                <Icon name="close" size={18} color={t.muted} />
+              </Pressable>
+              <Pressable onPress={store} hitSlop={8} style={[styles.add, { backgroundColor: t.accent }]} accessibilityLabel="Kaydet">
+                <Icon name="check" size={16} color={t.onAccent} strokeWidth={2.4} />
+              </Pressable>
+            </Card>
+          ))}
       </ScrollView>
     </View>
   );
@@ -118,6 +170,10 @@ const styles = StyleSheet.create({
   quick: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 14 },
   input: { flex: 1, fontSize: 16, paddingVertical: 14 },
   picks: { marginTop: 12 },
+  hint: { fontSize: 13, marginTop: 8, paddingHorizontal: 4 },
+  saveBtn: { marginTop: 16, borderRadius: 999, paddingVertical: 14, alignItems: 'center' },
+  saveText: { fontSize: 16, fontWeight: '700' },
+  saveCard: { marginTop: 16 },
   add: { width: 30, height: 30, borderRadius: 15, alignItems: 'center', justifyContent: 'center' },
   reset: { fontSize: 14, fontWeight: '600' },
   row: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 13, paddingHorizontal: 14, borderBottomWidth: StyleSheet.hairlineWidth },
