@@ -6,3 +6,10 @@ export function confirmUndo(title: string, onConfirm: () => void): void {
     { text: 'Geri al', style: 'destructive', onPress: onConfirm },
   ]);
 }
+
+export function confirmAsk(title: string, message: string, ok: string, onConfirm: () => void, destructive = false): void {
+  Alert.alert(title, message, [
+    { text: 'Vazgeç', style: 'cancel' },
+    { text: ok, style: destructive ? 'destructive' : 'default', onPress: onConfirm },
+  ]);
+}

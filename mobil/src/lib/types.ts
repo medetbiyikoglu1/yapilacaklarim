@@ -64,3 +64,10 @@ export type Exercise = {
   name: string;
   done: boolean;
 };
+
+// A saved workout: the moves that fill the Spor list when it is picked.
+export type Program = {
+  id: string;
+  name: string;
+  moves: string[];
+};

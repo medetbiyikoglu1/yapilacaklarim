@@ -3,11 +3,12 @@ import { Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } fro
 
 import { radius, useTheme } from '../lib/theme';
 
-export function Chip({ label, active, onPress, icon }: { label: string; active?: boolean; onPress: () => void; icon?: ReactNode }) {
+export function Chip({ label, active, onPress, onLongPress, icon }: { label: string; active?: boolean; onPress: () => void; onLongPress?: () => void; icon?: ReactNode }) {
   const t = useTheme();
   return (
     <Pressable
       onPress={onPress}
+      onLongPress={onLongPress}
       accessibilityRole="button"
       accessibilityState={{ selected: !!active }}
       style={({ pressed }) => [

@@ -5,11 +5,11 @@ import { AppState } from 'react-native';
 import { todayKey } from './dates';
 import { applyPlan, askPermission, onNotificationAction, setupNotifications, type NotificationAction } from './notifications';
 import { planNotifications } from './plan';
-import { hasSpor, resetExercises } from './spor';
+import { fromProgram, hasSpor, lowerTr, resetExercises } from './spor';
 import { snoozeOptions, snoozeTask, type SnoozeOption } from './snooze';
 import * as storage from './storage';
 import { canUndo as canUndoCompletion, completeTask, moveToTomorrow, newId, uncompleteTask } from './tasks';
-import { KEEP_DONE_DAYS, type Completion, type Exercise, type Settings, type Task } from './types';
+import { KEEP_DONE_DAYS, type Completion, type Exercise, type Program, type Settings, type Task } from './types';
 
 type Store = {
   tasks: Task[];
@@ -36,6 +36,11 @@ type Store = {
   toggleExercise: (id: string) => void;
   removeExercise: (id: string) => void;
   resetWorkout: () => void;
+  // The user's own programs; ready-made ones live in spor.ts.
+  programs: Program[];
+  saveProgram: (name: string) => void;
+  deleteProgram: (id: string) => void;
+  loadProgram: (program: Program) => void;
 };
 
 const Ctx = createContext<Store | null>(null);
@@ -55,14 +60,15 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [completions, setCompletions] = useState(initial.completions);
   const [settings, setSettings] = useState(initial.settings);
   const [exercises, setExercises] = useState(initial.exercises);
+  const [programs, setPrograms] = useState(initial.programs);
   const [today, setToday] = useState(todayKey());
   const [now, setNow] = useState(Date.now);
   const [picker, setPicker] = useState<{ id: string; openedAt: number } | null>(null);
 
   // Latest state for callbacks that outlive a render (notification taps).
-  const ref = useRef({ tasks, completions, settings });
+  const ref = useRef({ tasks, completions, settings, exercises });
   useLayoutEffect(() => {
-    ref.current = { tasks, completions, settings };
+    ref.current = { tasks, completions, settings, exercises };
   });
 
   const reschedule = useCallback(() => {
@@ -171,6 +177,29 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const toggleExercise = useCallback((id: string) => editExercises((all) => all.map((e) => (e.id === id ? { ...e, done: !e.done } : e))), [editExercises]);
   const removeExercise = useCallback((id: string) => editExercises((all) => all.filter((e) => e.id !== id)), [editExercises]);
   const resetWorkout = useCallback(() => editExercises(resetExercises), [editExercises]);
+  const loadProgram = useCallback((program: Program) => editExercises(() => fromProgram(program, newId)), [editExercises]);
+
+  const editPrograms = useCallback((update: (list: Program[]) => Program[]) => {
+    setPrograms((cur) => {
+      const next = update(cur);
+      storage.savePrograms(next);
+      return next;
+    });
+  }, []);
+  // Saves the current list under a name; the same name again overwrites that program.
+  const saveProgram = useCallback(
+    (name: string) => {
+      const n = name.trim();
+      const moves = ref.current.exercises.map((e) => e.name);
+      if (!n || !moves.length) return;
+      editPrograms((all) => {
+        const same = all.find((x) => lowerTr(x.name) === lowerTr(n));
+        return same ? all.map((x) => (x === same ? { ...x, name: n, moves } : x)) : [...all, { id: newId(), name: n, moves }];
+      });
+    },
+    [editPrograms],
+  );
+  const deleteProgram = useCallback((id: string) => editPrograms((all) => all.filter((x) => x.id !== id)), [editPrograms]);
   const showSpor = useMemo(() => hasSpor(tasks, completions, today), [tasks, completions, today]);
 
   // Notification buttons. A tap on an older occurrence than the task's current one is stale.
@@ -215,11 +244,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const value = useMemo(
     () => ({
       tasks, completions, settings, today, now, save, remove, complete, undo, canUndo, postpone, snooze, snoozing, openSnooze, closeSnooze, updateSettings,
-      showSpor, exercises, addExercise, toggleExercise, removeExercise, resetWorkout,
+      showSpor, exercises, addExercise, toggleExercise, removeExercise, resetWorkout, programs, saveProgram, deleteProgram, loadProgram,
     }),
     [
       tasks, completions, settings, today, now, save, remove, complete, undo, canUndo, postpone, snooze, snoozing, openSnooze, closeSnooze, updateSettings,
-      showSpor, exercises, addExercise, toggleExercise, removeExercise, resetWorkout,
+      showSpor, exercises, addExercise, toggleExercise, removeExercise, resetWorkout, programs, saveProgram, deleteProgram, loadProgram,
     ],
   );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
